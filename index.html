@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soporte IT en Tiempo Real | Portal de Cliente</title>
+    <title>IT Nexus | Enterprise Support Core</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,7 +14,10 @@
                     colors: {
                         darkBg: '#0B0F19',
                         darkCard: '#111827',
-                        darkBorder: '#1F2937'
+                        cardPurple: '#6366F1',
+                        cardBlue: '#3B82F6',
+                        cardEmerald: '#10B981',
+                        cardCyan: '#06B6D4'
                     }
                 }
             }
@@ -30,208 +33,296 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0B0F19; color: #F3F4F6; }
-        .glass-panel { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glow-effect { box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.15); }
+        .glass-panel { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glow-purple { box-shadow: 0 0 30px -5px rgba(99, 102, 241, 0.25); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white pb-20 md:pb-0">
+<body class="min-h-screen flex bg-darkBg text-slate-100 selection:bg-indigo-500 selection:text-white">
 
-    <!-- Header Navbar -->
-    <header class="w-full border-b border-slate-800/80 glass-panel sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center glow-effect">
-                <i data-lucide="cpu" class="w-5 h-5 text-white"></i>
+    <!-- SIDEBAR ESTILO IMAGEN 2 (Escritorio y Drawer Móvil) -->
+    <aside class="hidden md:flex flex-col w-72 border-r border-slate-800/80 glass-panel sticky top-0 h-screen z-40 p-6 justify-between">
+        <div class="space-y-8">
+            <!-- Brand -->
+            <div class="flex items-center space-x-3 px-1">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center glow-purple">
+                    <i data-lucide="cpu" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-tight text-white">IT NEXUS <span class="text-indigo-400 font-light">Core</span></h1>
+                    <p class="text-[10px] text-slate-400">Enterprise Operations</p>
+                </div>
             </div>
-            <div>
-                <h1 class="text-base font-bold tracking-tight text-white">IT NEXUS <span class="text-blue-400 font-light">Support</span></h1>
-                <p class="text-xs text-slate-400">Portal de Asistencia Corporativa</p>
+
+            <!-- Navegación Lateral -->
+            <nav class="space-y-2">
+                <button onclick="switchView('client')" id="sidebarClientBtn" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-xs font-semibold bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 transition-all duration-300">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span>Portal de Cliente</span>
+                </button>
+                <button onclick="switchView('tech')" id="sidebarTechBtn" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all duration-300">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                    <span>Panel de Técnico</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Widget de Estado inferior Sidebar -->
+        <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-white block">SLA Activo</span>
+                    <span class="text-[10px] text-slate-400">Protección corporativa</span>
+                </div>
             </div>
         </div>
-        <div class="flex items-center space-x-2">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Sistema Online
-            </span>
-        </div>
-    </header>
+    </aside>
 
-    <!-- Main Container -->
-    <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-8 md:py-12">
+    <!-- BARRA INFERIOR FLOTANTE MÓVIL (Inspirada en App Nativa de Imagen 2) -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-slate-800 px-6 py-3 flex justify-around items-center">
+        <button onclick="switchView('client')" id="mobileClientBtn" class="flex flex-col items-center text-indigo-400">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <span class="text-[10px] mt-1 font-medium">Portal</span>
+        </button>
+        <button onclick="switchView('tech')" id="mobileTechBtn" class="flex flex-col items-center text-slate-400">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+            <span class="text-[10px] mt-1 font-medium">Técnico</span>
+        </button>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="flex-1 flex flex-col min-h-screen pb-24 md:pb-0 overflow-y-auto">
         
-        <!-- Tarjeta / Contenedor Dinámico -->
-        <div id="mainContainer" class="glass-panel rounded-2xl p-6 md:p-8 transition-all duration-500 shadow-2xl relative overflow-hidden">
+        <!-- Header superior minimalista -->
+        <header class="w-full border-b border-slate-800/80 glass-panel px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+            <div>
+                <h2 id="mainHeaderTitle" class="text-base font-bold text-white">Solicitar Soporte Técnico</h2>
+                <p id="mainHeaderSubtitle" class="text-xs text-slate-400">Gestión inteligente de requerimientos corporativos</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-mono text-slate-400 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">v2.5 Enterprise</span>
+            </div>
+        </header>
+
+        <!-- VISTA 1: CLIENTE (Formulario y Timeline) -->
+        <div id="clientViewContainer" class="p-4 md:p-10 max-w-2xl w-full mx-auto space-y-6">
             
-            <!-- VISTA 1: Formulario de Creación -->
-            <div id="ticketFormView" class="transition-all duration-300">
-                <div class="mb-6">
-                    <h2 class="text-xl font-bold text-white">Solicitar Soporte Técnico</h2>
-                    <p class="text-sm text-slate-400 mt-1">Complete los detalles para asignar su requerimiento a un especialista.</p>
+            <div class="glass-panel rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden border border-slate-800">
+                
+                <!-- Formulario -->
+                <div id="ticketFormView" class="transition-all duration-300">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold text-white">Nuevo Requerimiento</h3>
+                        <p class="text-xs text-slate-400 mt-1">Complete los datos para enrutar su ticket con prioridad automática.</p>
+                    </div>
+
+                    <form id="supportForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Nombre del Cliente</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500"><i data-lucide="user" class="w-4 h-4"></i></span>
+                                <input type="text" id="client_name" required placeholder="Ej. Carlos Mendoza" class="w-full pl-10 pr-4 py-3 bg-slate-900/90 border border-slate-800 rounded-2xl text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Empresa</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500"><i data-lucide="building" class="w-4 h-4"></i></span>
+                                <input type="text" id="company" required placeholder="Ej. TechCorp Global" class="w-full pl-10 pr-4 py-3 bg-slate-900/90 border border-slate-800 rounded-2xl text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-all">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Tipo de Ticket</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500"><i data-lucide="tag" class="w-4 h-4"></i></span>
+                                <select id="ticket_type" class="w-full pl-10 pr-4 py-3 bg-slate-900/90 border border-slate-800 rounded-2xl text-sm text-white focus:outline-none focus:border-indigo-500 transition-all appearance-none">
+                                    <option value="Servicio técnico remoto">Servicio técnico remoto</option>
+                                    <option value="Infraestructura y Redes">Infraestructura y Redes</option>
+                                    <option value="Seguridad y Accesos">Seguridad y Accesos</option>
+                                    <option value="Hardware / Equipamiento">Hardware / Equipamiento</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Nivel de Prioridad</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="priority" value="🟡 Amarillo" class="peer sr-only" checked>
+                                    <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-center peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 hover:border-slate-700 transition-all">
+                                        <span class="block text-base mb-1">🟡</span>
+                                        <span class="text-[11px] font-semibold">Necesario</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="priority" value="🟠 Naranja" class="peer sr-only">
+                                    <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-center peer-checked:border-orange-500 peer-checked:bg-orange-500/10 peer-checked:text-orange-400 hover:border-slate-700 transition-all">
+                                        <span class="block text-base mb-1">🟠</span>
+                                        <span class="text-[11px] font-semibold">Prioritario</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="priority" value="🔴 Rojo" class="peer sr-only">
+                                    <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-center peer-checked:border-red-500 peer-checked:bg-red-500/10 peer-checked:text-red-400 hover:border-slate-700 transition-all">
+                                        <span class="block text-base mb-1">🔴</span>
+                                        <span class="text-[11px] font-semibold">Urgente</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="w-full mt-3 py-3.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-2xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2">
+                            <span>Enviar Solicitud</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </form>
                 </div>
 
-                <form id="supportForm" class="space-y-5">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Nombre del Cliente</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500"><i data-lucide="user" class="w-4 h-4"></i></span>
-                            <input type="text" id="client_name" required placeholder="Ej. Carlos Mendoza" class="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-300">
+                <!-- Ticket Activo y Timeline Dinámico (Oculto inicialmente) -->
+                <div id="ticketActiveView" class="hidden space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div>
+                            <span id="activePriorityBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border mb-2"></span>
+                            <h3 class="text-base font-bold text-white" id="activeTicketTitle"></h3>
+                            <p class="text-xs text-slate-400" id="activeTicketMeta"></p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-500 block">ID TICKET</span>
+                            <span id="activeTicketId" class="text-xs font-mono font-bold text-indigo-400">#----</span>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Empresa</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500"><i data-lucide="building" class="w-4 h-4"></i></span>
-                            <input type="text" id="company" required placeholder="Ej. TechCorp Global" class="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-300">
-                        </div>
-                    </div>
+                    <!-- Timeline 3 Pasos -->
+                    <div class="py-4">
+                        <h4 class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-6 text-center">Progreso de Atención en Tiempo Real</h4>
+                        <div class="relative flex items-center justify-between max-w-sm mx-auto px-4">
+                            <div class="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-1 bg-slate-800 z-0"></div>
+                            <div id="timelineProgress" class="absolute left-8 top-1/2 -translate-y-1/2 h-1 bg-indigo-500 z-0 transition-all duration-500" style="width: 0%;"></div>
 
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Tipo de Ticket</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500"><i data-lucide="tag" class="w-4 h-4"></i></span>
-                            <select id="ticket_type" class="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-300 appearance-none">
-                                <option value="Servicio técnico remoto">Servicio técnico remoto</option>
-                                <option value="Infraestructura y Redes">Infraestructura y Redes</option>
-                                <option value="Seguridad y Accesos">Seguridad y Accesos</option>
-                                <option value="Hardware / Equipamiento">Hardware / Equipamiento</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Nivel de Prioridad</label>
-                        <div class="grid grid-cols-3 gap-3">
-                            <label class="cursor-pointer">
-                                <input type="radio" name="priority" value="🟡 Amarillo" class="peer sr-only" checked>
-                                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-center peer-checked:border-amber-500 peer-checked:bg-amber-500/10 peer-checked:text-amber-400 hover:border-slate-700 transition-all duration-300">
-                                    <span class="block text-lg mb-1">🟡</span>
-                                    <span class="text-xs font-semibold">Necesario</span>
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div id="step1Icon" class="w-9 h-9 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-slate-400 transition-all">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i>
                                 </div>
-                            </label>
-                            <label class="cursor-pointer">
-                                <input type="radio" name="priority" value="🟠 Naranja" class="peer sr-only">
-                                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-center peer-checked:border-orange-500 peer-checked:bg-orange-500/10 peer-checked:text-orange-400 hover:border-slate-700 transition-all duration-300">
-                                    <span class="block text-lg mb-1">🟠</span>
-                                    <span class="text-xs font-semibold">Prioritario</span>
+                                <span class="text-[10px] font-medium text-slate-300 mt-2">Recibido</span>
+                            </div>
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div id="step2Icon" class="w-9 h-9 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-slate-400 transition-all">
+                                    <i data-lucide="loader" class="w-4 h-4"></i>
                                 </div>
-                            </label>
-                            <label class="cursor-pointer">
-                                <input type="radio" name="priority" value="🔴 Rojo" class="peer sr-only">
-                                <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-center peer-checked:border-red-500 peer-checked:bg-red-500/10 peer-checked:text-red-400 hover:border-slate-700 transition-all duration-300">
-                                    <span class="block text-lg mb-1">🔴</span>
-                                    <span class="text-xs font-semibold">Urgente</span>
+                                <span class="text-[10px] font-medium text-slate-300 mt-2">Atendiendo</span>
+                            </div>
+                            <div class="relative z-10 flex flex-col items-center">
+                                <div id="step3Icon" class="w-9 h-9 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-slate-400 transition-all">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
                                 </div>
-                            </label>
+                                <span class="text-[10px] font-medium text-slate-300 mt-2">Atendido</span>
+                            </div>
                         </div>
                     </div>
 
-                    <button type="submit" id="submitBtn" class="w-full mt-2 py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl shadow-lg shadow-blue-600/20 transition-all duration-300 flex items-center justify-center space-x-2">
-                        <span>Generar Ticket de Soporte</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    <button onclick="resetClientPortal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-2xl transition-all">
+                        Crear Nuevo Ticket
                     </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VISTA 2: TÉCNICO (Panel de Control, Smart Queue & Calendario) -->
+        <div id="techViewContainer" class="p-4 md:p-10 max-w-5xl w-full mx-auto space-y-6 hidden">
+            
+            <!-- Login Overlay si no está autenticado -->
+            <div id="techLoginBox" class="glass-panel rounded-3xl p-8 max-w-md mx-auto border border-indigo-500/20 text-center space-y-4">
+                <div class="w-12 h-12 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl mx-auto flex items-center justify-center text-indigo-400">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Acceso al Panel Técnico</h3>
+                    <p class="text-xs text-slate-400 mt-1">Ingrese sus credenciales corporativas autorizadas.</p>
+                </div>
+                <form id="techLoginForm" class="space-y-3 pt-2 text-left">
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Usuario</label>
+                        <input type="text" id="techUser" required class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="admin_it">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-300 mb-1">Contraseña</label>
+                        <input type="password" id="techPass" required class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-white">Iniciar Sesión de Técnico</button>
                 </form>
             </div>
 
-            <!-- VISTA 2: Hoja de Ticket Activa y Timeline (Oculto inicialmente) -->
-            <div id="ticketActiveView" class="hidden transition-all duration-500 space-y-6">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div>
-                        <span id="activePriorityBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border mb-2"></span>
-                        <h2 class="text-lg font-bold text-white" id="activeTicketTitle">Servicio Técnico Remoto</h2>
-                        <p class="text-xs text-slate-400" id="activeTicketMeta"></p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-xs text-slate-500 block">ID Ticket</span>
-                        <span id="activeTicketId" class="text-xs font-mono font-bold text-blue-400">#----</span>
-                    </div>
-                </div>
-
-                <!-- Timeline Estilo Delivery (3 Pasos) -->
-                <div class="py-4">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-6 text-center">Estado del Proceso en Tiempo Real</h3>
-                    <div class="relative flex items-center justify-between max-w-md mx-auto px-4">
-                        <!-- Barra de Progreso Fondo -->
-                        <div class="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-1 bg-slate-800 z-0"></div>
-                        <!-- Barra de Progreso Activa -->
-                        <div id="timelineProgress" class="absolute left-10 top-1/2 -translate-y-1/2 h-1 bg-blue-500 z-0 transition-all duration-500" style="width: 0%;"></div>
-
-                        <!-- Paso 1 -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div id="step1Icon" class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-slate-400 transition-all duration-300">
-                                <i data-lucide="file-text" class="w-4 h-4"></i>
-                            </div>
-                            <span class="text-xs font-medium text-slate-300 mt-2">Recibido</span>
+            <!-- Dashboard Operativo (Visible tras login) -->
+            <div id="techDashboardContent" class="space-y-6 hidden">
+                
+                <!-- Calendario de Historial Estilo Imagen 2 -->
+                <div class="glass-panel rounded-3xl p-6 border border-slate-800">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-3">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="calendar" class="w-4 h-4 text-indigo-400"></i>
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Historial por Fecha</h3>
                         </div>
-
-                        <!-- Paso 2 -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div id="step2Icon" class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-slate-400 transition-all duration-300">
-                                <i data-lucide="loader" class="w-4 h-4"></i>
-                            </div>
-                            <span class="text-xs font-medium text-slate-300 mt-2">Atendiendo</span>
-                        </div>
-
-                        <!-- Paso 3 -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div id="step3Icon" class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-slate-400 transition-all duration-300">
-                                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-                            </div>
-                            <span class="text-xs font-medium text-slate-300 mt-2">Atendido</span>
+                        <div class="flex items-center space-x-2">
+                            <select id="calMonth" onchange="renderCalendarDays()" class="bg-slate-900 border border-slate-800 rounded-xl text-xs px-3 py-1.5 text-slate-300 focus:outline-none">
+                                <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option><option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option><option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option><option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+                            </select>
+                            <select id="calYear" onchange="renderCalendarDays()" class="bg-slate-900 border border-slate-800 rounded-xl text-xs px-3 py-1.5 text-slate-300 focus:outline-none">
+                                <option value="2026">2026</option><option value="2025">2025</option>
+                            </select>
+                            <button onclick="clearDateFilter()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-xl text-slate-300 transition-all">Ver Activos</button>
                         </div>
                     </div>
+                    <!-- Mini Barra Estilo Tarjetas Horizontales Imagen 2 -->
+                    <div id="calendarDaysContainer" class="flex space-x-3 overflow-x-auto no-scrollbar py-2"></div>
                 </div>
 
-                <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-4 text-center">
-                    <p class="text-xs text-slate-400 flex items-center justify-center space-x-1.5">
-                        <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i>
-                        <span>Su requerimiento está siendo procesado de manera segura bajo los estándares SLA corporativos.</span>
-                    </p>
+                <!-- Cola Inteligente de Tickets -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 id="queueHeaderTitle" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Smart Queue (Prioridad + FIFO)</h3>
+                        <span id="ticketCountBadge" class="text-xs px-2.5 py-1 rounded-xl bg-indigo-500/10 text-indigo-400 font-mono">0 activos</span>
+                    </div>
+                    <div id="ticketsContainer" class="space-y-3"></div>
                 </div>
 
-                <button onclick="resetClientPortal()" class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl transition-all duration-300">
-                    Crear Nueva Solicitud
-                </button>
             </div>
 
         </div>
+
     </main>
 
-    <!-- MODAL EMERGENTE DE EVALUACIÓN DE EXPERIENCIA (Oculto por defecto) -->
-    <div id="feedbackModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
-        <div class="glass-panel max-w-md w-full rounded-2xl p-6 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl border border-blue-500/20" id="feedbackModalContent">
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl mx-auto flex items-center justify-center text-emerald-400 mb-3">
-                    <i data-lucide="award" class="w-6 h-6"></i>
-                </div>
-                <h3 class="text-lg font-bold text-white">¡Ticket Atendido con Éxito!</h3>
-                <p class="text-xs text-slate-400 mt-1">Nos importa mucho la calidad de nuestro servicio. Por favor, evalúe su experiencia.</p>
+    <!-- MODAL DE EVALUACIÓN DE EXPERIENCIA (Con Festejos / Confeti) -->
+    <div id="feedbackModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-all duration-300">
+        <div class="glass-panel max-w-md w-full rounded-3xl p-8 transform scale-95 transition-all shadow-2xl border border-indigo-500/20 text-center">
+            <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl mx-auto flex items-center justify-center text-emerald-400 mb-3">
+                <i data-lucide="award" class="w-6 h-6"></i>
             </div>
+            <h3 class="text-base font-bold text-white">¡Ticket Atendido con Éxito!</h3>
+            <p class="text-xs text-slate-400 mt-1 mb-6">Por favor, califique la calidad del soporte recibido.</p>
 
-            <!-- Selector Interactivo de Estrellas -->
             <div class="flex justify-center space-x-2 mb-6" id="starContainer">
-                <button type="button" onclick="setRating(1)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="1"><i data-lucide="star" class="w-8 h-8 fill-current"></i></button>
-                <button type="button" onclick="setRating(2)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="2"><i data-lucide="star" class="w-8 h-8 fill-current"></i></button>
-                <button type="button" onclick="setRating(3)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="3"><i data-lucide="star" class="w-8 h-8 fill-current"></i></button>
-                <button type="button" onclick="setRating(4)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="4"><i data-lucide="star" class="w-8 h-8 fill-current"></i></button>
-                <button type="button" onclick="setRating(5)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="5"><i data-lucide="star" class="w-8 h-8 fill-current"></i></button>
+                <button type="button" onclick="setRating(1)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="1"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                <button type="button" onclick="setRating(2)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="2"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                <button type="button" onclick="setRating(3)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="3"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                <button type="button" onclick="setRating(4)" class="star-btn text-slate-600 hover:text-amber-400 transition-colors" data-value="4"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
+                <button type="button" onclick="setRating(5)" class="star-btn text-amber-400 transition-colors" data-value="5"><i data-lucide="star" class="w-7 h-7 fill-current"></i></button>
             </div>
 
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Comentarios o Sugerencias</label>
-                    <textarea id="feedbackComment" rows="3" placeholder="Cuéntenos cómo fue la atención..." class="w-full p-3 bg-slate-900/80 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-all"></textarea>
-                </div>
+            <textarea id="feedbackComment" rows="3" placeholder="Comentarios adicionales..." class="w-full p-3 bg-slate-900 border border-slate-800 rounded-2xl text-xs text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 mb-4"></textarea>
 
-                <button onclick="submitFeedback()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl shadow-lg shadow-emerald-600/25 transition-all duration-300 flex items-center justify-center space-x-2">
-                    <span>Enviar Evaluación</span>
-                    <i data-lucide="send" class="w-4 h-4"></i>
-                </button>
-            </div>
+            <button onclick="submitFeedback()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-2xl shadow-lg shadow-emerald-600/30 transition-all text-xs">Enviar Evaluación</button>
         </div>
     </div>
 
-    <!-- Script de Integración Supabase y Lógica de Interfaz Cliente -->
+    <!-- SCRIPT DE LÓGICA E INTEGRACIÓN MODULAR -->
     <script>
-        // Inicializar Iconos Lucide
         lucide.createIcons();
 
         // CONFIGURACIÓN SUPABASE (Reemplazar con tus credenciales reales)
@@ -241,13 +332,49 @@
 
         let currentTicketId = null;
         let selectedRating = 5;
+        let allTickets = [];
+        let isTechnicianAuthenticated = false;
+        let selectedDateFilter = null;
 
-        // Manejo del Formulario
+        // Cambio de Vistas Fluidas Sidebar / Navbar
+        function switchView(view) {
+            const clientContainer = document.getElementById('clientViewContainer');
+            const techContainer = document.getElementById('techViewContainer');
+            const sClientBtn = document.getElementById('sidebarClientBtn');
+            const sTechBtn = document.getElementById('sidebarTechBtn');
+            const mClientBtn = document.getElementById('mobileClientBtn');
+            const mTechBtn = document.getElementById('mobileTechBtn');
+            const headerTitle = document.getElementById('mainHeaderTitle');
+            const headerSubtitle = document.getElementById('mainHeaderSubtitle');
+
+            if (view === 'client') {
+                clientContainer.classList.remove('hidden');
+                techContainer.classList.add('hidden');
+                sClientBtn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-xs font-semibold bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 transition-all";
+                sTechBtn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all";
+                mClientBtn.className = "flex flex-col items-center text-indigo-400";
+                mTechBtn.className = "flex flex-col items-center text-slate-400";
+                headerTitle.innerText = "Solicitar Soporte Técnico";
+                headerSubtitle.innerText = "Gestión inteligente de requerimientos corporativos";
+            } else {
+                clientContainer.classList.add('hidden');
+                techContainer.classList.remove('hidden');
+                sTechBtn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-xs font-semibold bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 transition-all";
+                sClientBtn.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-xs font-semibold text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all";
+                mTechBtn.className = "flex flex-col items-center text-indigo-400";
+                mClientBtn.className = "flex flex-col items-center text-slate-400";
+                headerTitle.innerText = "Panel de Control Técnico";
+                headerSubtitle.innerText = "Smart Queue corporativa en tiempo real";
+                fetchTickets();
+            }
+        }
+
+        // Manejo Formulario Cliente
         document.getElementById('supportForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Generando ticket...</span>`;
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Enviando...</span>`;
             lucide.createIcons();
 
             const client_name = document.getElementById('client_name').value;
@@ -258,60 +385,39 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('tickets')
-                    .insert([{
-                        client_name,
-                        company,
-                        ticket_type,
-                        priority,
-                        status: 'Recibido',
-                        created_at: new Date().toISOString()
-                    }])
-                    .select()
-                    .single();
+                    .insert([{ client_name, company, ticket_type, priority, status: 'Recibido', created_at: new Date().toISOString() }])
+                    .select().single();
 
                 if (error) throw error;
-
                 currentTicketId = data.id;
                 transitionToActiveTicket(data);
                 subscribeToTicketChanges(currentTicketId);
-
             } catch (err) {
                 alert('Error al conectar con Supabase: ' + err.message);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<span>Generar Ticket de Soporte</span><i data-lucide="arrow-right" class="w-4 h-4"></i>`;
+                btn.disabled = false;
+                btn.innerHTML = `<span>Enviar Solicitud</span><i data-lucide="arrow-right" class="w-4 h-4"></i>`;
                 lucide.createIcons();
             }
         });
 
         function transitionToActiveTicket(ticket) {
-            document.getElementById('ticketFormView').classList.add('opacity-0', 'scale-95', 'hidden');
-            
-            setTimeout(() => {
-                const activeView = document.getElementById('ticketActiveView');
-                activeView.classList.remove('hidden');
-                
-                document.getElementById('activeTicketTitle').innerText = ticket.ticket_type;
-                document.getElementById('activeTicketMeta').innerText = `${ticket.client_name} • ${ticket.company}`;
-                document.getElementById('activeTicketId').innerText = `#${ticket.id.toString().slice(-4)}`;
-                
-                updatePriorityBadge(ticket.priority);
-                updateTimelineUI(ticket.status);
-            }, 300);
+            document.getElementById('ticketFormView').classList.add('hidden');
+            const activeView = document.getElementById('ticketActiveView');
+            activeView.classList.remove('hidden');
+
+            document.getElementById('activeTicketTitle').innerText = ticket.ticket_type;
+            document.getElementById('activeTicketMeta').innerText = `${ticket.client_name} • ${ticket.company}`;
+            document.getElementById('activeTicketId').innerText = `#${ticket.id.toString().slice(-4)}`;
+            updatePriorityBadge(ticket.priority);
+            updateTimelineUI(ticket.status);
         }
 
         function updatePriorityBadge(priority) {
             const badge = document.getElementById('activePriorityBadge');
             badge.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border mb-2";
-            if (priority.includes('Rojo')) {
-                badge.classList.add('bg-red-500/10', 'text-red-400', 'border-red-500/20');
-                badge.innerHTML = '<span>🔴 Urgente</span>';
-            } else if (priority.includes('Naranja')) {
-                badge.classList.add('bg-orange-500/10', 'text-orange-400', 'border-orange-500/20');
-                badge.innerHTML = '<span>🟠 Prioritario</span>';
-            } else {
-                badge.classList.add('bg-amber-500/10', 'text-amber-400', 'border-amber-500/20');
-                badge.innerHTML = '<span>🟡 Necesario</span>';
-            }
+            if (priority.includes('Rojo')) { badge.classList.add('bg-red-500/10', 'text-red-400', 'border-red-500/20'); badge.innerText = '🔴 Urgente'; }
+            else if (priority.includes('Naranja')) { badge.classList.add('bg-orange-500/10', 'text-orange-400', 'border-orange-500/20'); badge.innerText = '🟠 Prioritario'; }
+            else { badge.classList.add('bg-amber-500/10', 'text-amber-400', 'border-amber-500/20'); badge.innerText = '🟡 Necesario'; }
         }
 
         function updateTimelineUI(status) {
@@ -320,99 +426,160 @@
             const s2 = document.getElementById('step2Icon');
             const s3 = document.getElementById('step3Icon');
 
-            // Reset classes
-            [s1, s2, s3].forEach(el => {
-                el.className = "w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-slate-400 transition-all duration-300";
-            });
+            [s1, s2, s3].forEach(el => el.className = "w-9 h-9 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-slate-400");
 
             if (status === 'Recibido') {
                 progress.style.width = '0%';
-                s1.className = "w-10 h-10 rounded-full bg-blue-600 border-2 border-blue-400 flex items-center justify-center text-white shadow-lg shadow-blue-600/30";
+                s1.className = "w-9 h-9 rounded-full bg-indigo-600 border-2 border-indigo-400 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30";
             } else if (status === 'Atendiendo el Ticket') {
                 progress.style.width = '50%';
-                s1.className = "w-10 h-10 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center text-white";
-                s2.className = "w-10 h-10 rounded-full bg-blue-600 border-2 border-blue-400 flex items-center justify-center text-white shadow-lg shadow-blue-600/30 animate-pulse";
+                s1.className = "w-9 h-9 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center text-white";
+                s2.className = "w-9 h-9 rounded-full bg-indigo-600 border-2 border-indigo-400 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30 animate-pulse";
             } else if (status === 'Ticket Atendido') {
                 progress.style.width = '100%';
-                s1.className = "w-10 h-10 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center text-white";
-                s2.className = "w-10 h-10 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center text-white";
-                s3.className = "w-10 h-10 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center text-white shadow-lg shadow-emerald-600/30";
-                
-                // Activar Festejos y Modal
+                s1.className = "w-9 h-9 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center text-white";
+                s2.className = "w-9 h-9 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center text-white";
+                s3.className = "w-9 h-9 rounded-full bg-emerald-600 border-2 border-emerald-400 flex items-center justify-center text-white shadow-lg shadow-emerald-600/30";
                 triggerCelebrationAndModal();
             }
         }
 
-        // Suscripción Realtime Supabase
         function subscribeToTicketChanges(ticketId) {
-            supabaseClient
-                .channel(`ticket-changes-${ticketId}`)
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'tickets',
-                    filter: `id=eq.${ticketId}`
-                }, (payload) => {
-                    updateTimelineUI(payload.new.status);
-                })
-                .subscribe();
+            supabaseClient.channel(`t-${ticketId}`)
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets', filter: `id=eq.${ticketId}` }, p => {
+                    updateTimelineUI(p.new.status);
+                }).subscribe();
         }
 
-        // Efecto de Festejos y Modal
         function triggerCelebrationAndModal() {
-            // Disparar confeti ligero
-            confetti({
-                particleCount: 80,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-
-            // Mostrar Modal con desenfoque de fondo
+            confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
             const modal = document.getElementById('feedbackModal');
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                document.getElementById('feedbackModalContent').classList.remove('scale-95');
-            }, 10);
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
         }
 
-        function setRating(rating) {
-            selectedRating = rating;
-            const buttons = document.querySelectorAll('.star-btn');
-            buttons.forEach((btn, index) => {
-                if (index < rating) {
-                    btn.classList.add('text-amber-400');
-                    btn.classList.remove('text-slate-600');
-                } else {
-                    btn.classList.remove('text-amber-400');
-                    btn.classList.add('text-slate-600');
-                }
+        function setRating(r) {
+            selectedRating = r;
+            document.querySelectorAll('.star-btn').forEach((btn, idx) => {
+                btn.className = idx < r ? "star-btn text-amber-400 transition-colors" : "star-btn text-slate-600 transition-colors";
             });
         }
 
         async function submitFeedback() {
             const comment = document.getElementById('feedbackComment').value;
-            try {
-                const { error } = await supabaseClient
-                    .from('tickets')
-                    .update({
-                        rating: selectedRating,
-                        feedback_comment: comment
-                    })
-                    .eq('id', currentTicketId);
+            await supabaseClient.from('tickets').update({ rating: selectedRating, feedback_comment: comment }).eq('id', currentTicketId);
+            location.reload();
+        }
 
-                if (error) throw error;
+        function resetClientPortal() { location.reload(); }
 
-                alert('¡Gracias por evaluar nuestro servicio!');
-                location.reload();
-            } catch (err) {
-                alert('Error al enviar la evaluación: ' + err.message);
+        // Lógica de Técnico y Login
+        document.getElementById('techLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('techUser').value;
+            const p = document.getElementById('techPass').value;
+            if (u === 'admin_it' && p === 'nexus2026') {
+                isTechnicianAuthenticated = true;
+                document.getElementById('techLoginBox').classList.add('hidden');
+                document.getElementById('techDashboardContent').classList.remove('hidden');
+                initCalendar();
+                fetchTickets();
+            } else {
+                alert('Credenciales incorrectas');
+            }
+        });
+
+        async function fetchTickets() {
+            const { data } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: true });
+            allTickets = data || [];
+            if (isTechnicianAuthenticated) renderQueue();
+        }
+
+        function initCalendar() {
+            const now = new Date();
+            document.getElementById('calMonth').value = now.getMonth();
+            document.getElementById('calYear').value = now.getFullYear();
+            renderCalendarDays();
+        }
+
+        function renderCalendarDays() {
+            const year = parseInt(document.getElementById('calYear').value);
+            const month = parseInt(document.getElementById('calMonth').value);
+            const container = document.getElementById('calendarDaysContainer');
+            container.innerHTML = '';
+            const daysCount = new Date(year, month + 1, 0).getDate();
+
+            for (let d = 1; d <= daysCount; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `flex flex-col items-center justify-center min-w-[50px] h-16 rounded-2xl border text-xs transition-all ${selectedDateFilter === dateStr ? 'border-indigo-500 bg-indigo-600/20 text-indigo-400' : 'border-slate-800 bg-slate-900/60 text-slate-300'}`;
+                btn.innerHTML = `<span class="text-[10px] text-slate-500">${d}</span><span class="font-bold text-xs mt-1">${['Do','Lu','Ma','Mi','Ju','Vi','Sa'][new Date(year, month, d).getDay()]}</span>`;
+                btn.onclick = () => { selectedDateFilter = dateStr; renderCalendarDays(); renderQueue(); };
+                container.appendChild(btn);
             }
         }
 
-        function resetClientPortal() {
-            location.reload();
+        function clearDateFilter() {
+            selectedDateFilter = null;
+            renderCalendarDays();
+            renderQueue();
         }
+
+        function renderQueue() {
+            const container = document.getElementById('ticketsContainer');
+            container.innerHTML = '';
+            let list = selectedDateFilter ? allTickets.filter(t => (t.resolved_at || t.created_at).split('T')[0] === selectedDateFilter) : allTickets.filter(t => t.status !== 'Ticket Atendido');
+
+            // Ordenamiento FIFO + Prioridad
+            const weight = { '🔴 Rojo': 3, '🟠 Naranja': 2, '🟡 Amarillo': 1 };
+            list.sort((a,b) => (weight[b.priority] || 0) - (weight[a.priority] || 0) || new Date(a.created_at) - new Date(b.created_at));
+
+            document.getElementById('ticketCountBadge').innerText = `${list.length} items`;
+            if (list.length === 0) { container.innerHTML = `<div class="glass-panel rounded-2xl p-8 text-center text-slate-500 text-xs">No hay tickets en esta vista.</div>`; return; }
+
+            list.forEach(t => {
+                const card = document.createElement('div');
+                card.className = "glass-panel rounded-2xl p-5 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4";
+                const diffMins = Math.floor((new Date() - new Date(t.created_at)) / 60000);
+
+                card.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-indigo-400"><i data-lucide="cpu" class="w-5 h-5"></i></div>
+                        <div>
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-xs font-mono text-slate-500">#${t.id.toString().slice(-4)}</span>
+                                <span class="text-xs text-slate-400">• ${t.company}</span>
+                            </div>
+                            <h4 class="text-sm font-bold text-white">${t.ticket_type}</h4>
+                            <p class="text-xs text-slate-400 mt-0.5">Cliente: <span class="text-slate-200">${t.client_name}</span></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4 w-full md:w-auto justify-between border-t md:border-t-0 pt-3 md:pt-0 border-slate-800">
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-500 block">TIEMPO TRANSCURRIDO</span>
+                            <span class="text-xs font-mono font-bold text-amber-400">${diffMins} min</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300">${t.status}</span>
+                            <button onclick="updateStatus(${t.id}, 'Atendiendo el Ticket')" class="p-2 rounded-xl bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all"><i data-lucide="play" class="w-4 h-4"></i></button>
+                            <button onclick="updateStatus(${t.id}, 'Ticket Atendido')" class="p-2 rounded-xl bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-all"><i data-lucide="check" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        async function updateStatus(id, status) {
+            const data = { status };
+            if (status === 'Ticket Atendido') data.resolved_at = new Date().toISOString();
+            await supabaseClient.from('tickets').update(data).eq('id', id);
+            fetchTickets();
+        }
+
+        window.onload = () => { fetchTickets(); };
     </script>
 </body>
 </html>
