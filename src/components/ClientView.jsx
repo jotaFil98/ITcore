@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { PlusCircle, Clock, CheckCircle2, AlertCircle, Building2, User, Tag, ArrowRight } from 'lucide-react'
+import { PlusCircle, Clock, CheckCircle2, AlertCircle, Building2, User, Tag, ArrowRight, Star } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import confetti from 'canvas-confetti'
 import RatingModal from './RatingModal'
@@ -14,7 +14,7 @@ export default function ClientView() {
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Consultar si hay un ticket activo reciente en localStorage o estado local
+  // Consultar si hay un ticket activo y escuchar cambios en tiempo real
   useEffect(() => {
     const savedTicketId = localStorage.getItem('active_ticket_id')
     if (savedTicketId) {
@@ -31,6 +31,10 @@ export default function ClientView() {
 
     if (!error && data) {
       setActiveTicket(data)
+      // Si el ticket ya está atendido y no tiene rating, permitimos evaluar
+      if (data.status === 'Ticket atendido' && !data.rating) {
+        // Opcional: abrir modal de calificación si el cliente entra y ya se completó
+      }
     } else {
       localStorage.removeItem('active_ticket_id')
     }
@@ -68,17 +72,15 @@ export default function ClientView() {
       return
     }
 
-    // Guardar ticket activo y disparar confeti + modal
     setActiveTicket(data)
     localStorage.setItem('active_ticket_id', data.id)
 
+    // Confeti al crear el ticket con éxito (Sin modal forzado de estrellas todavía)
     confetti({
       particleCount: 120,
       spread: 70,
       origin: { y: 0.6 }
     })
-
-    setShowModal(true)
   }
 
   const getPriorityBadge = (p) => {
@@ -94,17 +96,15 @@ export default function ClientView() {
     }
   }
 
-  // Renderizar progreso de pasos (Línea de tiempo estilo delivery)
-  const renderTimeline = (currentStatus) => {
+  const renderTimeline = (currentStatus, ticket) => {
     const steps = ['Ticket entregado', 'Atendiendo el ticket', 'Ticket atendido']
     let currentIndex = steps.indexOf(currentStatus)
     if (currentIndex === -1) currentIndex = 0
 
     return (
       <div className="mt-6 pt-6 border-t border-[#2a2240]">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Estado del Proceso</p>
-        <div className="relative flex items-center justify-between max-w-sm mx-auto">
-          {/* Línea conectora de fondo */}
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Estado del Proceso en Tiempo Real</p>
+        <div className="relative flex items-center justify-between max-w-sm mx-auto mb-6">
           <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-[#2a2240] z-0"></div>
           
           {steps.map((step, idx) => {
@@ -125,6 +125,30 @@ export default function ClientView() {
             )
           })}
         </div>
+
+        {/* Si el ticket ya está atendido, se habilita el botón para evaluar */}
+        {currentStatus === 'Ticket atendido' && !ticket.rating && (
+          <div className="bg-purple-950/40 border border-purple-700/40 p-4 rounded-2xl text-center animate-pulse">
+            <p className="text-xs text-purple-200 font-medium mb-2">¡Tu servicio ha sido completado con éxito!</p>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition"
+            >
+              Evaluar Experiencia ⭐
+            </button>
+          </div>
+        )}
+
+        {ticket.rating && (
+          <div className="bg-green-950/30 border border-green-800/40 p-4 rounded-2xl text-center">
+            <p className="text-xs text-green-300 font-medium mb-1">¡Gracias por tu valoración!</p>
+            <div className="flex justify-center gap-1">
+              {[...Array(ticket.rating)].map((_, i) => (
+                <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -135,22 +159,23 @@ export default function ClientView() {
         <RatingModal 
           ticketId={activeTicket?.id} 
           onClose={() => setShowModal(false)}
-          onRated={() => setShowModal(false)}
+          onRated={() => {
+            setShowModal(false)
+            fetchTicketDetails(activeTicket.id)
+          }}
         />
       )}
 
-      {/* Header estilo imagen de referencia */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white">Portal de Clientes</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Genera y rastrea tu solicitud de soporte</p>
+          <p className="text-xs text-gray-400 mt-0.5">Seguimiento de tu solicitud técnica</p>
         </div>
         <div className="bg-[#161325] border border-[#2a2240] p-2.5 rounded-2xl text-purple-400 shadow-inner">
           <Tag size={20} />
         </div>
       </div>
 
-      {/* Si ya hay un ticket activo, se muestra como "Hoja de ticket" con su línea de tiempo */}
       {activeTicket ? (
         <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl relative overflow-hidden mb-6">
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -176,8 +201,7 @@ export default function ClientView() {
             </div>
           </div>
 
-          {/* Línea de tiempo de entrega */}
-          {renderTimeline(activeTicket.status)}
+          {renderTimeline(activeTicket.status, activeTicket)}
 
           <button
             onClick={() => {
@@ -190,7 +214,6 @@ export default function ClientView() {
           </button>
         </div>
       ) : (
-        /* Formulario de Creación de Ticket */
         <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl">
           <h2 className="text-lg font-bold text-white mb-4">Nuevo Requerimiento</h2>
           

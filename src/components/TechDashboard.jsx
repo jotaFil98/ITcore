@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, CheckCircle, Clock, AlertCircle, Building2, User, ChevronRight, Star, RefreshCw } from 'lucide-react'
+import { Calendar, CheckCircle, Clock, AlertCircle, Building2, User, ChevronRight, Star, RefreshCw, BarChart3 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 
 export default function TechDashboard() {
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
+  const [selectedDate, setSelectedDate] = useState(null) // Filtro por fecha de calendario minimalista
 
-  // Cargar tickets de Supabase en tiempo real o por llamada
   const fetchTickets = async () => {
     setLoading(true)
     const { data, error } = await supabase
@@ -26,7 +26,6 @@ export default function TechDashboard() {
     fetchTickets()
   }, [])
 
-  // Cambiar estado fluidamente
   const handleStatusChange = async (ticketId, currentStatus) => {
     let nextStatus = ''
     let resolvedAtValue = null
@@ -37,7 +36,7 @@ export default function TechDashboard() {
       nextStatus = 'Ticket atendido'
       resolvedAtValue = new Date().toISOString()
     } else {
-      nextStatus = 'Ticket entregado' // Ciclo opcional o reinicio
+      nextStatus = 'Ticket entregado'
     }
 
     const updatePayload = { status: nextStatus }
@@ -58,7 +57,28 @@ export default function TechDashboard() {
     }
   }
 
-  // Métricas calculadas para la parte superior estilo "Let's improve our performance"
+  // Generar últimos 5 días para el calendario minimalista superior
+  const getDaysBar = () => {
+    const days = []
+    for (let i = 4; i >= 0; i--) {
+      const d = new Date()
+      d.setDate(d.getDate() - i)
+      days.push({
+        dateStr: d.toISOString().split('T')[0],
+        dayName: d.toLocaleDateString('es-ES', { weekday: 'short' }),
+        dayNum: d.getDate()
+      })
+    }
+    return days
+  }
+
+  const daysList = getDaysBar()
+
+  // Filtrar tickets por fecha seleccionada si aplica
+  const filteredTickets = selectedDate 
+    ? tickets.filter(t => t.created_at && t.created_at.startsWith(selectedDate))
+    : tickets
+
   const totalCount = tickets.length
   const completedCount = tickets.filter(t => t.status === 'Ticket atendido').length
   const performancePercentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
@@ -78,7 +98,47 @@ export default function TechDashboard() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6 pb-20 animate-fadeIn">
-      {/* Header y Panel de Rendimiento */}
+      {/* Barra de Calendario Minimalista Superior (Estilo UI de referencia) */}
+      <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-4 mb-6 shadow-xl flex items-center justify-between overflow-x-auto">
+        <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold uppercase tracking-wider px-2">
+          <Calendar size={16} className="text-purple-400" /> Días:
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSelectedDate(null)}
+            className={`px-3 py-2 rounded-2xl text-xs font-semibold transition ${
+              selectedDate === null 
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' 
+                : 'bg-[#0c0a14] text-gray-400 hover:text-white border border-[#2a2240]'
+            }`}
+          >
+            Todos
+          </button>
+          {daysList.map((item) => {
+            const isSelected = selectedDate === item.dateStr
+            const countForDay = tickets.filter(t => t.created_at && t.created_at.startsWith(item.dateStr)).length
+            return (
+              <button
+                key={item.dateStr}
+                onClick={() => setSelectedDate(item.dateStr)}
+                className={`flex flex-col items-center px-3.5 py-2 rounded-2xl text-xs transition border ${
+                  isSelected
+                    ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/50'
+                    : 'bg-[#0c0a14] border-[#2a2240] text-gray-300 hover:border-purple-500/40'
+                }`}
+              >
+                <span className="text-[10px] uppercase opacity-75">{item.dayName}</span>
+                <span className="font-bold text-sm">{item.dayNum}</span>
+                {countForDay > 0 && (
+                  <span className="mt-1 w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Grid Superior: Panel y Tarjeta de Rendimiento con efecto Neón */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="md:col-span-2 bg-[#161325] border border-[#2a2240] rounded-3xl p-6 relative overflow-hidden shadow-xl">
           <div className="absolute right-[-20px] bottom-[-20px] w-40 h-40 bg-purple-600/10 rounded-full blur-3xl"></div>
@@ -95,39 +155,41 @@ export default function TechDashboard() {
           </div>
         </div>
 
-        {/* Tarjeta de Rendimiento (Circular simulado estilo UI de referencia) */}
-        <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 flex items-center justify-between shadow-xl">
+        {/* Tarjeta de Rendimiento con Efecto Neón en Hover */}
+        <div className="bg-[#161325] border border-[#2a2240] hover:border-purple-500 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all duration-300 rounded-3xl p-6 flex items-center justify-between shadow-xl cursor-pointer group">
           <div>
-            <p className="text-[11px] font-bold text-gray-400 uppercase">Rendimiento</p>
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 uppercase group-text-purple-400">
+              <BarChart3 size={14} className="text-purple-400" /> Rendimiento
+            </div>
             <h3 className="text-xl font-bold text-white mt-1">Tareas al día</h3>
             <span className="text-xs text-purple-400 font-medium mt-1 inline-block">{completedCount} de {totalCount} completados</span>
           </div>
-          <div className="relative w-16 h-16 flex items-center justify-center rounded-full bg-[#0c0a14] border-4 border-purple-600/30">
+          <div className="relative w-16 h-16 flex items-center justify-center rounded-full bg-[#0c0a14] border-4 border-purple-600/30 group-hover:border-purple-500 transition-colors">
             <span className="text-sm font-bold text-purple-300">{performancePercentage}%</span>
           </div>
         </div>
       </div>
 
-      {/* Listado de Tickets en Tarjetas */}
+      {/* Listado de Tickets Recibidos */}
       <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Calendar size={18} className="text-purple-400" /> Tickets Recibidos
+            <Calendar size={18} className="text-purple-400" /> Tickets Recibidos {selectedDate && `(${selectedDate})`}
           </h2>
           <span className="text-xs bg-[#221c38] text-gray-300 px-3 py-1 rounded-full border border-[#362b52]">
-            {tickets.length} Total
+            {filteredTickets.length} Filtrados
           </span>
         </div>
 
         {loading ? (
           <div className="text-center py-12 text-gray-500 text-sm">Cargando tickets...</div>
-        ) : tickets.length === 0 ? (
+        ) : filteredTickets.length === 0 ? (
           <div className="text-center py-12 text-gray-500 text-sm bg-[#0c0a14]/40 rounded-2xl border border-dashed border-[#2a2240]">
-            No hay tickets registrados todavía.
+            No hay tickets registrados para este filtro.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {tickets.map((ticket) => (
+            {filteredTickets.map((ticket) => (
               <div 
                 key={ticket.id} 
                 className="bg-[#0c0a14] border border-[#2a2240] hover:border-purple-500/40 rounded-2xl p-5 transition flex flex-col justify-between shadow-md relative group"
@@ -152,7 +214,6 @@ export default function TechDashboard() {
                     </div>
                   </div>
 
-                  {/* Valoración del cliente si existe */}
                   {ticket.rating && (
                     <div className="bg-[#161325] p-2.5 rounded-xl border border-[#2a2240] mb-4 flex items-center justify-between">
                       <div className="flex items-center gap-1">
@@ -169,7 +230,6 @@ export default function TechDashboard() {
                   )}
                 </div>
 
-                {/* Acciones de Estado (Botón para avanzar flujo) */}
                 <div className="pt-3 border-t border-[#2a2240] flex items-center justify-between mt-auto">
                   <div className="flex items-center gap-1.5 text-xs">
                     <span className={`w-2 h-2 rounded-full ${
