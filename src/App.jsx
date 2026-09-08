@@ -22,7 +22,6 @@ export default function App() {
 
   const handleLogin = (e) => {
     e.preventDefault()
-    // Contraseña actualizada a gorditolindo
     if (username === 'admin' && password === 'gorditolindo') {
       setIsAuth(true)
       setShowLoginModal(false)
@@ -41,66 +40,66 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0a14] text-gray-100 flex flex-col justify-between selection:bg-purple-500 selection:text-white">
-      {/* Modal de Autenticación Elegante */}
+    <div className="min-h-screen text-gray-800 flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+      {/* Modal de Autenticación */}
       {showLoginModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-          <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 md:p-8 w-full max-w-sm shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-sm shadow-2xl relative border border-gray-100">
             <button 
               onClick={() => { setShowLoginModal(false); setLoginError(false); }}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white bg-[#221c38] p-2 rounded-full transition"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 p-2 rounded-full transition"
             >
               <X size={20} />
             </button>
 
             <div className="text-center mb-6">
-              <div className="w-12 h-12 bg-purple-600/20 border border-purple-500/30 text-purple-400 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+              <div className="w-12 h-12 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
                 <Lock size={24} />
               </div>
-              <h2 className="text-xl font-bold text-white">Panel Técnico</h2>
-              <p className="text-gray-400 text-xs mt-1">Introduce tus credenciales de acceso</p>
+              <h2 className="text-xl font-bold text-gray-900">Panel Técnico</h2>
+              <p className="text-gray-500 text-xs mt-1">Introduce tus credenciales de acceso</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Usuario</label>
+                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Usuario</label>
                 <div className="relative">
-                  <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="admin"
-                    className="w-full bg-[#0c0a14] border border-[#2a2240] rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-purple-500 transition"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-gray-900 text-sm focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Contraseña</label>
+                <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wider">Contraseña</label>
                 <div className="relative">
-                  <Key size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <Key size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full bg-[#0c0a14] border border-[#2a2240] rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-purple-500 transition"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-gray-900 text-sm focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
               </div>
 
               {loginError && (
-                <p className="text-red-400 text-xs text-center font-medium bg-red-950/40 py-2 rounded-xl border border-red-900/40">
+                <p className="text-red-500 text-xs text-center font-medium bg-red-50 py-2 rounded-xl border border-red-100">
                   Credenciales incorrectas. Intenta de nuevo.
                 </p>
               )}
 
               <button
                 type="submit"
-                className="w-full mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-purple-900/40 transition transform active:scale-95"
+                className="w-full mt-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-500/30 transition transform active:scale-95"
               >
                 Acceder al Sistema
               </button>
@@ -110,33 +109,33 @@ export default function App() {
       )}
 
       {/* Navbar Superior */}
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-[#0c0a14]/80 border-b border-[#2a2240] px-4 py-3">
+      <header className="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-gray-200 px-4 py-3 shadow-sm">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-tr from-purple-600 to-indigo-600 p-2 rounded-xl text-white shadow-md shadow-purple-900/50">
+            <div className="bg-emerald-600 p-2 rounded-xl text-white shadow-md shadow-emerald-600/30">
               <Layers size={20} />
             </div>
-            <span className="font-bold text-base tracking-tight text-white">Soporte<span className="text-purple-400">Tech</span></span>
+            <span className="font-extrabold text-base tracking-tight text-gray-900">Soporte<span className="text-emerald-600">Tech</span></span>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="bg-[#161325] p-1 rounded-2xl border border-[#2a2240] flex space-x-1">
+            <div className="bg-gray-100 p-1 rounded-2xl border border-gray-200 flex space-x-1">
               <button
                 onClick={() => handleNavClick('client')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition ${
                   currentView === 'client'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-900/40'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
+                    : 'text-gray-500 hover:text-gray-900'
                 }`}
               >
                 <Users size={15} /> Vista Clientes
               </button>
               <button
                 onClick={() => handleNavClick('tech')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition ${
                   currentView === 'tech'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-900/40'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
+                    : 'text-gray-500 hover:text-gray-900'
                 }`}
               >
                 <MonitorPlay size={15} /> Panel Técnico {isAuth && '✓'}
@@ -147,7 +146,7 @@ export default function App() {
               <button
                 onClick={handleLogout}
                 title="Cerrar sesión"
-                className="bg-[#161325] hover:bg-red-950/40 text-gray-400 hover:text-red-400 p-2.5 rounded-2xl border border-[#2a2240] transition"
+                className="bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 p-2.5 rounded-2xl border border-gray-200 transition"
               >
                 <LogOut size={18} />
               </button>
@@ -156,12 +155,13 @@ export default function App() {
         </div>
       </header>
 
-      {/* Contenido */}
+      {/* Contenido Principal */}
       <main className="flex-grow py-6">
         {currentView === 'client' ? <ClientView /> : <TechDashboard />}
       </main>
 
-      <footer className="text-center py-6 text-xs text-gray-600 border-t border-[#2a2240]/40">
+      {/* Footer */}
+      <footer className="text-center py-6 text-xs text-gray-400 border-t border-gray-200">
         Sistema de Soporte Técnico Integrado con Supabase & Vercel
       </footer>
     </div>
