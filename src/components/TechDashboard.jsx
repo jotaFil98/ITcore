@@ -77,7 +77,7 @@ export default function TechDashboard() {
     localStorage.setItem('tech_whatsapp', techWhatsapp)
     localStorage.setItem('tech_email', techEmail)
     setShowSettingsModal(false)
-    alert('Ajustes guardados correctamente.')
+    alert('Ajustes y preferencias de notificación guardados correctamente.')
   }
 
   const handleStatusChange = async (ticketId, currentStatus) => {
@@ -184,7 +184,7 @@ export default function TechDashboard() {
         </div>
       )}
 
-      {/* Modal de ajustes con opción de Google / Permiso de Notificaciones */}
+      {/* Modal de ajustes (Tus datos de receptor de alertas) */}
       {showSettingsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
@@ -195,23 +195,23 @@ export default function TechDashboard() {
                 <Settings size={22} />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Ajustes de Alertas</h2>
-                <p className="text-gray-500 text-xs">Configura notificaciones y canales</p>
+                <h2 className="text-xl font-bold text-gray-900">Ajustes de Notificaciones</h2>
+                <p className="text-gray-500 text-xs">¿A dónde quieres recibir tus avisos de nuevos tickets?</p>
               </div>
             </div>
 
             <form onSubmit={saveSettings} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1 uppercase">WhatsApp del Técnico</label>
-                <input type="text" value={techWhatsapp} onChange={(e) => setTechWhatsapp(e.target.value)} placeholder="+54911..." className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 text-sm" />
+                <label className="block text-xs font-bold text-gray-600 mb-1 uppercase">Tu WhatsApp (Receptor de alertas)</label>
+                <input type="text" value={techWhatsapp} onChange={(e) => setTechWhatsapp(e.target.value)} placeholder="Ej. +54911..." className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 text-sm" />
+                <p className="text-[10px] text-gray-400 mt-1">Número donde deseas recibir reportes internos del sistema.</p>
               </div>
               
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1 uppercase">Correo Electrónico</label>
-                <input type="email" value={techEmail} onChange={(e) => setTechEmail(e.target.value)} placeholder="admin@correo.com" className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 text-sm" />
+                <label className="block text-xs font-bold text-gray-600 mb-1 uppercase">Tu Correo (Receptor de alertas)</label>
+                <input type="email" value={techEmail} onChange={(e) => setTechEmail(e.target.value)} placeholder="tu-correo@gmail.com" className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 text-sm" />
               </div>
 
-              {/* SECCIÓN DE PERMISOS DE GOOGLE / NAVEGADOR */}
               <div className="pt-2 border-t border-gray-100">
                 <label className="block text-xs font-bold text-gray-600 mb-2 uppercase flex items-center gap-1.5">
                   <ShieldCheck size={16} className="text-emerald-600" /> Permisos de Notificación Google
@@ -222,7 +222,7 @@ export default function TechDashboard() {
                     <span className={`text-xs font-semibold capitalize ${
                       notifPermission === 'granted' ? 'text-emerald-600' : notifPermission === 'denied' ? 'text-red-500' : 'text-amber-500'
                     }`}>
-                      {notifPermission === 'granted' ? 'Permitidas (Activas)' : notifPermission === 'denied' ? 'Bloqueadas por el navegador' : 'Pendiente de permiso'}
+                      {notifPermission === 'granted' ? 'Permitidas (Activas)' : notifPermission === 'denied' ? 'Bloqueadas' : 'Pendiente'}
                     </span>
                   </div>
                   
@@ -236,20 +236,17 @@ export default function TechDashboard() {
                     </button>
                   )}
                 </div>
-                <p className="text-[11px] text-gray-400 mt-1.5">
-                  Al hacer clic en "Permitir", Google te mostrará una ventana emergente pidiendo autorización para mostrarte alertas de nuevos tickets en tu escritorio.
-                </p>
               </div>
 
-              <button type="submit" className="w-full mt-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-500/30 transition">
-                Guardar Ajustes
+              <button type="submit" className="w-full mt-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-500/30">
+                Guardar Preferencias
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* Notificación flotante dentro de la app */}
+      {/* Notificación flotante */}
       {newTicketAlert && (
         <div className="fixed bottom-6 right-6 z-50 bg-emerald-900 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce">
           <Bell size={20} />
@@ -324,8 +321,9 @@ export default function TechDashboard() {
         ) : (
           <div className="space-y-4">
             {filteredTickets.map((ticket) => {
-              const techWa = localStorage.getItem('tech_whatsapp')
-              const waLink = techWa ? `https://wa.me/${techWa.replace(/[^0-9]/g, '')}?text=Hola,%20atiendo%20tu%20ticket:%20${encodeURIComponent(ticket.ticket_type)}` : null
+              // Enlace genérico para reportar/chatear sobre este ticket específico (sin usar tu número de técnico)
+              const ticketWaMsg = encodeURIComponent(`Hola ${ticket.client_name}, te escribo de SoporteTech respecto a tu ticket de ${ticket.ticket_type} para la empresa ${ticket.company}.`)
+              const generalWaLink = `https://wa.me/?text=${ticketWaMsg}`
 
               let progressPercent = 0
               let statusBadgeBg = 'bg-yellow-50 text-yellow-700 border-yellow-200'
@@ -371,12 +369,10 @@ export default function TechDashboard() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {waLink && (
-                        <a href={waLink} target="_blank" rel="noopener noreferrer" className="bg-green-100 text-green-800 p-2 rounded-xl" title="WhatsApp">
-                          <MessageSquare size={16} />
-                        </a>
-                      )}
-                      <button onClick={() => setTicketToDelete(ticket)} className="bg-red-50 text-red-600 p-2 rounded-xl" title="Eliminar"><Trash2 size={16} /></button>
+                      <a href={generalWaLink} target="_blank" rel="noopener noreferrer" className="bg-green-100 hover:bg-green-200 text-green-800 p-2 rounded-xl transition" title="Compartir/Enviar info por WhatsApp">
+                        <MessageSquare size={16} />
+                      </a>
+                      <button onClick={() => setTicketToDelete(ticket)} className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl transition" title="Eliminar"><Trash2 size={16} /></button>
                       <button 
                         onClick={() => handleStatusChange(ticket.id, ticket.status)}
                         disabled={isAnimating}
