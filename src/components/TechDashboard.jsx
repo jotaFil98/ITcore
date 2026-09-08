@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, CheckCircle, Clock, AlertCircle, Building2, User, ChevronRight, Star, RefreshCw, BarChart3 } from 'lucide-react'
+import { Calendar, CheckCircle, Clock, AlertCircle, Building2, User, ChevronRight, Star, RefreshCw, BarChart3, Bell } from 'lucide-react'
 import { supabase } from '../supabaseClient'
+import PerformanceModal from './PerformanceModal'
 
 export default function TechDashboard() {
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedDate, setSelectedDate] = useState(null) // Filtro por fecha de calendario minimalista
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [showPerformanceModal, setShowPerformanceModal] = useState(false)
+  const [newTicketAlert, setNewTicketAlert] = useState(null)
 
   const fetchTickets = async () => {
     setLoading(true)
@@ -22,8 +25,23 @@ export default function TechDashboard() {
     setLoading(false)
   }
 
+  // Configurar Supabase Realtime para detectar nuevos tickets al instante
   useEffect(() => {
     fetchTickets()
+
+    const channel = supabase
+      .channel('public:tickets')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tickets' }, (payload) => {
+        setNewTicketAlert(payload.new)
+        fetchTickets()
+        // Ocultar alerta a los 6 segundos
+        setTimeout(() => setNewTicketAlert(null), 6000)
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const handleStatusChange = async (ticketId, currentStatus) => {
@@ -57,7 +75,6 @@ export default function TechDashboard() {
     }
   }
 
-  // Generar últimos 5 días para el calendario minimalista superior
   const getDaysBar = () => {
     const days = []
     for (let i = 4; i >= 0; i--) {
@@ -73,8 +90,6 @@ export default function TechDashboard() {
   }
 
   const daysList = getDaysBar()
-
-  // Filtrar tickets por fecha seleccionada si aplica
   const filteredTickets = selectedDate 
     ? tickets.filter(t => t.created_at && t.created_at.startsWith(selectedDate))
     : tickets
@@ -97,8 +112,26 @@ export default function TechDashboard() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6 pb-20 animate-fadeIn">
-      {/* Barra de Calendario Minimalista Superior (Estilo UI de referencia) */}
+    <div className="max-w-4xl mx-auto p-4 md:p-6 pb-20 animate-fadeIn relative">
+      {/* Modal de Analítica Avanzada */}
+      {showPerformanceModal && (
+        <PerformanceModal tickets={tickets} onClose={() => setShowPerformanceModal(false)} />
+      )}
+
+      {/* Notificación flotante en tiempo real para el técnico */}
+      {newTicketAlert && (
+        <div className="fixed bottom-6 right-6 z-50 bg-purple-900/90 border border-purple-500 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md animate-bounce">
+          <div className="p-2 bg-purple-600 rounded-xl">
+            <Bell size={20} />
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-purple-200">¡Nuevo Ticket Recibido!</p>
+            <p className="text-sm font-semibold">{newTicketAlert.client_name} ({newTicketAlert.company})</p>
+          </div>
+        </div>
+      )}
+
+      {/* Calendario Minimalista Superior */}
       <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-4 mb-6 shadow-xl flex items-center justify-between overflow-x-auto">
         <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold uppercase tracking-wider px-2">
           <Calendar size={16} className="text-purple-400" /> Días:
@@ -138,7 +171,7 @@ export default function TechDashboard() {
         </div>
       </div>
 
-      {/* Grid Superior: Panel y Tarjeta de Rendimiento con efecto Neón */}
+      {/* Grid Superior */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="md:col-span-2 bg-[#161325] border border-[#2a2240] rounded-3xl p-6 relative overflow-hidden shadow-xl">
           <div className="absolute right-[-20px] bottom-[-20px] w-40 h-40 bg-purple-600/10 rounded-full blur-3xl"></div>
@@ -155,14 +188,17 @@ export default function TechDashboard() {
           </div>
         </div>
 
-        {/* Tarjeta de Rendimiento con Efecto Neón en Hover */}
-        <div className="bg-[#161325] border border-[#2a2240] hover:border-purple-500 hover:shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all duration-300 rounded-3xl p-6 flex items-center justify-between shadow-xl cursor-pointer group">
+        {/* Tarjeta de Rendimiento con Efecto Neón y Clickable para abrir Analítica */}
+        <div 
+          onClick={() => setShowPerformanceModal(true)}
+          className="bg-[#161325] border border-[#2a2240] hover:border-purple-500 hover:shadow-[0_0_25px_rgba(124,58,237,0.4)] transition-all duration-300 rounded-3xl p-6 flex items-center justify-between shadow-xl cursor-pointer group"
+        >
           <div>
-            <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 uppercase group-text-purple-400">
-              <BarChart3 size={14} className="text-purple-400" /> Rendimiento
+            <div className="flex items-center gap-1.5 text-[11px] font-bold text-purple-400 uppercase">
+              <BarChart3 size={14} /> Analítica 📊
             </div>
             <h3 className="text-xl font-bold text-white mt-1">Tareas al día</h3>
-            <span className="text-xs text-purple-400 font-medium mt-1 inline-block">{completedCount} de {totalCount} completados</span>
+            <span className="text-xs text-gray-400 font-medium mt-1 inline-block">{completedCount} de {totalCount} completados</span>
           </div>
           <div className="relative w-16 h-16 flex items-center justify-center rounded-full bg-[#0c0a14] border-4 border-purple-600/30 group-hover:border-purple-500 transition-colors">
             <span className="text-sm font-bold text-purple-300">{performancePercentage}%</span>
