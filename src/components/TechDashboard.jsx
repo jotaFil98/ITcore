@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, CheckCircle, Clock, Building2, User, ChevronRight, Star, RefreshCw, BarChart3, Bell, Settings, MessageSquare, Mail, X, Trash2, CheckCircle2, ShieldCheck } from 'lucide-react'
+import { Calendar, CheckCircle, Clock, Building2, User, ChevronRight, Star, RefreshCw, BarChart3, Bell, Settings, X, Trash2, ShieldCheck } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import PerformanceModal from './PerformanceModal'
 
@@ -12,8 +12,6 @@ export default function TechDashboard() {
   const [animatingId, setAnimatingId] = useState(null)
 
   const [showSettingsModal, setShowSettingsModal] = useState(false)
-  const [techWhatsapp, setTechWhatsapp] = useState(localStorage.getItem('tech_whatsapp') || '')
-  const [techEmail, setTechEmail] = useState(localStorage.getItem('tech_email') || '')
   const [notifPermission, setNotifPermission] = useState(typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default')
 
   const [ticketToDelete, setTicketToDelete] = useState(null)
@@ -45,7 +43,7 @@ export default function TechDashboard() {
 
         if (Notification.permission === 'granted') {
           new Notification('¡Nuevo Ticket de Soporte!', {
-            body: `${ticket.client_name} (${ticket.company}) - Prioridad: ${ticket.priority}`,
+            body: `Cliente: ${ticket.client_name} (${ticket.company}) - Prioridad: ${ticket.priority}`,
             icon: '/vite.svg'
           })
         }
@@ -67,17 +65,9 @@ export default function TechDashboard() {
     Notification.requestPermission().then((permission) => {
       setNotifPermission(permission)
       if (permission === 'granted') {
-        new Notification('¡Notificaciones activadas!', { body: 'Ahora recibirás alertas flotantes de Google cuando se creen tickets.' })
+        new Notification('¡Notificaciones activadas!', { body: 'Recibirás alertas de Google cuando se creen tickets.' })
       }
     })
-  }
-
-  const saveSettings = (e) => {
-    e.preventDefault()
-    localStorage.setItem('tech_whatsapp', techWhatsapp)
-    localStorage.setItem('tech_email', techEmail)
-    setShowSettingsModal(false)
-    alert('Ajustes y preferencias de notificación guardados correctamente.')
   }
 
   const handleStatusChange = async (ticketId, currentStatus) => {
@@ -184,7 +174,7 @@ export default function TechDashboard() {
         </div>
       )}
 
-      {/* Modal de ajustes (Tus datos de receptor de alertas) */}
+      {/* Modal exclusivo para permisos de Notificaciones de Google */}
       {showSettingsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
@@ -196,57 +186,47 @@ export default function TechDashboard() {
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900">Ajustes de Notificaciones</h2>
-                <p className="text-gray-500 text-xs">¿A dónde quieres recibir tus avisos de nuevos tickets?</p>
+                <p className="text-gray-500 text-xs">Gestiona las alertas de escritorio</p>
               </div>
             </div>
 
-            <form onSubmit={saveSettings} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1 uppercase">Tu WhatsApp (Receptor de alertas)</label>
-                <input type="text" value={techWhatsapp} onChange={(e) => setTechWhatsapp(e.target.value)} placeholder="Ej. +54911..." className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 text-sm" />
-                <p className="text-[10px] text-gray-400 mt-1">Número donde deseas recibir reportes internos del sistema.</p>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1 uppercase">Tu Correo (Receptor de alertas)</label>
-                <input type="email" value={techEmail} onChange={(e) => setTechEmail(e.target.value)} placeholder="tu-correo@gmail.com" className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 text-sm" />
-              </div>
-
-              <div className="pt-2 border-t border-gray-100">
-                <label className="block text-xs font-bold text-gray-600 mb-2 uppercase flex items-center gap-1.5">
-                  <ShieldCheck size={16} className="text-emerald-600" /> Permisos de Notificación Google
-                </label>
-                <div className="flex items-center justify-between bg-gray-50 p-3.5 rounded-2xl border border-gray-200">
-                  <div>
-                    <span className="text-xs font-bold text-gray-800 block">Estado actual:</span>
-                    <span className={`text-xs font-semibold capitalize ${
-                      notifPermission === 'granted' ? 'text-emerald-600' : notifPermission === 'denied' ? 'text-red-500' : 'text-amber-500'
-                    }`}>
-                      {notifPermission === 'granted' ? 'Permitidas (Activas)' : notifPermission === 'denied' ? 'Bloqueadas' : 'Pendiente'}
-                    </span>
-                  </div>
-                  
-                  {notifPermission !== 'granted' && (
-                    <button
-                      type="button"
-                      onClick={requestBrowserPermission}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition"
-                    >
-                      Permitir Notificaciones
-                    </button>
-                  )}
+            <div className="space-y-4 pt-2">
+              <label className="block text-xs font-bold text-gray-600 uppercase flex items-center gap-1.5">
+                <ShieldCheck size={16} className="text-emerald-600" /> Permisos de Notificación Google
+              </label>
+              <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                <div>
+                  <span className="text-xs font-bold text-gray-800 block">Estado actual:</span>
+                  <span className={`text-xs font-semibold capitalize ${
+                    notifPermission === 'granted' ? 'text-emerald-600' : notifPermission === 'denied' ? 'text-red-500' : 'text-amber-500'
+                  }`}>
+                    {notifPermission === 'granted' ? 'Permitidas (Activas)' : notifPermission === 'denied' ? 'Bloqueadas' : 'Pendiente'}
+                  </span>
                 </div>
+                
+                {notifPermission !== 'granted' && (
+                  <button
+                    type="button"
+                    onClick={requestBrowserPermission}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition"
+                  >
+                    Permitir
+                  </button>
+                )}
               </div>
-
-              <button type="submit" className="w-full mt-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-500/30">
-                Guardar Preferencias
+              <p className="text-[11px] text-gray-400">
+                Al hacer clic en "Permitir", Google te pedirá autorización para mostrar notificaciones flotantes en tu pantalla cuando se cree un nuevo ticket.
+              </p>
+              
+              <button onClick={() => setShowSettingsModal(false)} className="w-full mt-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3.5 rounded-2xl transition">
+                Cerrar
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Notificación flotante */}
+      {/* Notificación flotante interna */}
       {newTicketAlert && (
         <div className="fixed bottom-6 right-6 z-50 bg-emerald-900 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce">
           <Bell size={20} />
@@ -321,10 +301,6 @@ export default function TechDashboard() {
         ) : (
           <div className="space-y-4">
             {filteredTickets.map((ticket) => {
-              // Enlace genérico para reportar/chatear sobre este ticket específico (sin usar tu número de técnico)
-              const ticketWaMsg = encodeURIComponent(`Hola ${ticket.client_name}, te escribo de SoporteTech respecto a tu ticket de ${ticket.ticket_type} para la empresa ${ticket.company}.`)
-              const generalWaLink = `https://wa.me/?text=${ticketWaMsg}`
-
               let progressPercent = 0
               let statusBadgeBg = 'bg-yellow-50 text-yellow-700 border-yellow-200'
               if (ticket.status === 'Atendiendo el ticket') {
@@ -369,10 +345,7 @@ export default function TechDashboard() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <a href={generalWaLink} target="_blank" rel="noopener noreferrer" className="bg-green-100 hover:bg-green-200 text-green-800 p-2 rounded-xl transition" title="Compartir/Enviar info por WhatsApp">
-                        <MessageSquare size={16} />
-                      </a>
-                      <button onClick={() => setTicketToDelete(ticket)} className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-xl transition" title="Eliminar"><Trash2 size={16} /></button>
+                      <button onClick={() => setTicketToDelete(ticket)} className="bg-red-50 hover:bg-red-100 text-red-600 p-2.5 rounded-xl transition" title="Eliminar"><Trash2 size={16} /></button>
                       <button 
                         onClick={() => handleStatusChange(ticket.id, ticket.status)}
                         disabled={isAnimating}
