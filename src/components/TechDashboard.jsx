@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, CheckCircle, Clock, AlertCircle, Building2, User, ChevronRight, Star, RefreshCw, BarChart3, Bell } from 'lucide-react'
+import { Calendar, CheckCircle, Clock, AlertCircle, Building2, User, ChevronRight, Star, RefreshCw, BarChart3, Bell, Settings, MessageSquare, Mail, X } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import PerformanceModal from './PerformanceModal'
 
@@ -9,6 +9,12 @@ export default function TechDashboard() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [showPerformanceModal, setShowPerformanceModal] = useState(false)
   const [newTicketAlert, setNewTicketAlert] = useState(null)
+
+  // Estados de configuración de notificaciones del técnico
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [techWhatsapp, setTechWhatsapp] = useState(localStorage.getItem('tech_whatsapp') || '')
+  const [techEmail, setTechEmail] = useState(localStorage.getItem('tech_email') || '')
+  const [notifPermission, setNotifPermission] = useState(Notification.permission || 'default')
 
   const fetchTickets = async () => {
     setLoading(true)
@@ -25,17 +31,26 @@ export default function TechDashboard() {
     setLoading(false)
   }
 
-  // Configurar Supabase Realtime para detectar nuevos tickets al instante
+  // Configurar Supabase Realtime y Notificaciones del navegador
   useEffect(() => {
     fetchTickets()
 
     const channel = supabase
       .channel('public:tickets')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tickets' }, (payload) => {
-        setNewTicketAlert(payload.new)
+        const ticket = payload.new
+        setNewTicketAlert(ticket)
         fetchTickets()
-        // Ocultar alerta a los 6 segundos
-        setTimeout(() => setNewTicketAlert(null), 6000)
+
+        // Si el navegador tiene permiso, lanzar notificación nativa
+        if (Notification.permission === 'granted') {
+          new Notification('¡Nuevo Ticket de Soporte!', {
+            body: `${ticket.client_name} (${ticket.company}) - Prioridad: ${ticket.priority}`,
+            icon: '/vite.svg'
+          })
+        }
+
+        setTimeout(() => setNewTicketAlert(null), 7000)
       })
       .subscribe()
 
@@ -43,6 +58,27 @@ export default function TechDashboard() {
       supabase.removeChannel(channel)
     }
   }, [])
+
+  const requestBrowserPermission = () => {
+    if (!('Notification' in window)) {
+      alert('Tu navegador no soporta notificaciones de escritorio.')
+      return
+    }
+    Notification.requestPermission().then((permission) => {
+      setNotifPermission(permission)
+      if (permission === 'granted') {
+        new Notification('¡Notificaciones activadas!', { body: 'Recibirás alertas cuando se creen tickets.' })
+      }
+    })
+  }
+
+  const saveSettings = (e) => {
+    e.preventDefault()
+    localStorage.setItem('tech_whatsapp', techWhatsapp)
+    localStorage.setItem('tech_email', techEmail)
+    setShowSettingsModal(false)
+    alert('Configuración de alertas guardada con éxito.')
+  }
 
   const handleStatusChange = async (ticketId, currentStatus) => {
     let nextStatus = ''
@@ -113,12 +149,88 @@ export default function TechDashboard() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6 pb-20 animate-fadeIn relative">
-      {/* Modal de Analítica Avanzada */}
       {showPerformanceModal && (
         <PerformanceModal tickets={tickets} onClose={() => setShowPerformanceModal(false)} />
       )}
 
-      {/* Notificación flotante en tiempo real para el técnico */}
+      {/* Modal de Configuración de Alertas */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
+            <button 
+              onClick={() => setShowSettingsModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white bg-[#221c38] p-2 rounded-full transition"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-purple-600/20 border border-purple-500/30 text-purple-400 rounded-2xl">
+                <Settings size={22} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Ajustes de Alertas</h2>
+                <p className="text-gray-400 text-xs">Configura tus vías de notificación</p>
+              </div>
+            </div>
+
+            <form onSubmit={saveSettings} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase flex items-center gap-1.5">
+                  <MessageSquare size={14} className="text-green-400" /> WhatsApp del Técnico
+                </label>
+                <input
+                  type="text"
+                  value={techWhatsapp}
+                  onChange={(e) => setTechWhatsapp(e.target.value)}
+                  placeholder="Ej. +5491122334455"
+                  className="w-full bg-[#0c0a14] border border-[#2a2240] rounded-2xl py-3 px-4 text-white text-sm focus:outline-none focus:border-purple-500 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase flex items-center gap-1.5">
+                  <Mail size={14} className="text-purple-400" /> Correo Gmail
+                </label>
+                <input
+                  type="email"
+                  value={techEmail}
+                  onChange={(e) => setTechEmail(e.target.value)}
+                  placeholder="tecnico@gmail.com"
+                  className="w-full bg-[#0c0a14] border border-[#2a2240] rounded-2xl py-3 px-4 text-white text-sm focus:outline-none focus:border-purple-500 transition"
+                />
+              </div>
+
+              <div className="pt-2 border-t border-[#2a2240]">
+                <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase">Permiso de Notificaciones del Navegador</label>
+                <div className="flex items-center justify-between bg-[#0c0a14] p-3.5 rounded-2xl border border-[#2a2240]">
+                  <span className="text-xs text-gray-300">
+                    Estado: <strong className={notifPermission === 'granted' ? 'text-green-400' : 'text-yellow-400'}>{notifPermission}</strong>
+                  </span>
+                  {notifPermission !== 'granted' && (
+                    <button
+                      type="button"
+                      onClick={requestBrowserPermission}
+                      className="bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition"
+                    >
+                      Permitir Alertas
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-purple-900/40 transition"
+              >
+                Guardar Configuración
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Notificación flotante en tiempo real */}
       {newTicketAlert && (
         <div className="fixed bottom-6 right-6 z-50 bg-purple-900/90 border border-purple-500 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 backdrop-blur-md animate-bounce">
           <div className="p-2 bg-purple-600 rounded-xl">
@@ -131,7 +243,7 @@ export default function TechDashboard() {
         </div>
       )}
 
-      {/* Calendario Minimalista Superior */}
+      {/* Calendario Minimalista Superior con botón de Ajustes */}
       <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-4 mb-6 shadow-xl flex items-center justify-between overflow-x-auto">
         <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold uppercase tracking-wider px-2">
           <Calendar size={16} className="text-purple-400" /> Días:
@@ -169,6 +281,14 @@ export default function TechDashboard() {
             )
           })}
         </div>
+
+        <button
+          onClick={() => setShowSettingsModal(true)}
+          title="Ajustes de Notificaciones"
+          className="bg-[#0c0a14] hover:bg-[#221c38] text-purple-400 p-2.5 rounded-2xl border border-[#2a2240] transition ml-2"
+        >
+          <Settings size={18} />
+        </button>
       </div>
 
       {/* Grid Superior */}
@@ -188,7 +308,7 @@ export default function TechDashboard() {
           </div>
         </div>
 
-        {/* Tarjeta de Rendimiento con Efecto Neón y Clickable para abrir Analítica */}
+        {/* Tarjeta de Rendimiento Neón */}
         <div 
           onClick={() => setShowPerformanceModal(true)}
           className="bg-[#161325] border border-[#2a2240] hover:border-purple-500 hover:shadow-[0_0_25px_rgba(124,58,237,0.4)] transition-all duration-300 rounded-3xl p-6 flex items-center justify-between shadow-xl cursor-pointer group"
@@ -206,7 +326,7 @@ export default function TechDashboard() {
         </div>
       </div>
 
-      {/* Listado de Tickets Recibidos */}
+      {/* Listado de Tickets Recibidos con acceso rápido a WhatsApp si el técnico lo configuró */}
       <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -225,65 +345,83 @@ export default function TechDashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredTickets.map((ticket) => (
-              <div 
-                key={ticket.id} 
-                className="bg-[#0c0a14] border border-[#2a2240] hover:border-purple-500/40 rounded-2xl p-5 transition flex flex-col justify-between shadow-md relative group"
-              >
-                <div>
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="text-xs font-bold text-purple-400 bg-purple-950/60 px-2.5 py-1 rounded-md border border-purple-800/30">
-                      {ticket.ticket_type}
-                    </span>
-                    {getPriorityBadge(ticket.priority)}
-                  </div>
+            {filteredTickets.map((ticket) => {
+              const techWa = localStorage.getItem('tech_whatsapp')
+              const waLink = techWa ? `https://wa.me/${techWa.replace(/[^0-9]/g, '')}?text=Hola,%20atiendo%20tu%20ticket%20de%20soporte:%20${encodeURIComponent(ticket.ticket_type)}%20para%20la%20empresa%20${encodeURIComponent(ticket.company)}` : null
 
-                  <h3 className="text-base font-bold text-white mb-2">{ticket.client_name}</h3>
-                  
-                  <div className="space-y-1 text-xs text-gray-400 mb-4">
-                    <div className="flex items-center gap-1.5">
-                      <Building2 size={13} className="text-purple-400" /> {ticket.company}
+              return (
+                <div 
+                  key={ticket.id} 
+                  className="bg-[#0c0a14] border border-[#2a2240] hover:border-purple-500/40 rounded-2xl p-5 transition flex flex-col justify-between shadow-md relative group"
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="text-xs font-bold text-purple-400 bg-purple-950/60 px-2.5 py-1 rounded-md border border-purple-800/30">
+                        {ticket.ticket_type}
+                      </span>
+                      {getPriorityBadge(ticket.priority)}
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock size={13} className="text-purple-400" /> 
-                      {new Date(ticket.created_at).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
-                    </div>
-                  </div>
 
-                  {ticket.rating && (
-                    <div className="bg-[#161325] p-2.5 rounded-xl border border-[#2a2240] mb-4 flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        {[...Array(ticket.rating)].map((_, i) => (
-                          <Star key={i} size={14} className="fill-yellow-400 text-yellow-400" />
-                        ))}
+                    <h3 className="text-base font-bold text-white mb-2">{ticket.client_name}</h3>
+                    
+                    <div className="space-y-1 text-xs text-gray-400 mb-4">
+                      <div className="flex items-center gap-1.5">
+                        <Building2 size={13} className="text-purple-400" /> {ticket.company}
                       </div>
-                      {ticket.feedback_comment && (
-                        <span className="text-[11px] text-gray-300 italic truncate max-w-[150px]">
-                          "{ticket.feedback_comment}"
-                        </span>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        <Clock size={13} className="text-purple-400" /> 
+                        {new Date(ticket.created_at).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' })}
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                <div className="pt-3 border-t border-[#2a2240] flex items-center justify-between mt-auto">
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <span className={`w-2 h-2 rounded-full ${
-                      ticket.status === 'Ticket atendido' ? 'bg-green-500' :
-                      ticket.status === 'Atendiendo el ticket' ? 'bg-orange-500' : 'bg-yellow-500'
-                    }`}></span>
-                    <span className="font-semibold text-gray-300">{ticket.status}</span>
+                    {ticket.rating && (
+                      <div className="bg-[#161325] p-2.5 rounded-xl border border-[#2a2240] mb-4 flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          {[...Array(ticket.rating)].map((_, i) => (
+                            <Star key={i} size={14} className="fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                        {ticket.feedback_comment && (
+                          <span className="text-[11px] text-gray-300 italic truncate max-w-[150px]">
+                            "{ticket.feedback_comment}"
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <button
-                    onClick={() => handleStatusChange(ticket.id, ticket.status)}
-                    className="bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-xl border border-purple-700/40 transition flex items-center gap-1"
-                  >
-                    Avanzar <ChevronRight size={14} />
-                  </button>
+                  <div className="pt-3 border-t border-[#2a2240] flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <span className={`w-2 h-2 rounded-full ${
+                        ticket.status === 'Ticket atendido' ? 'bg-green-500' :
+                        ticket.status === 'Atendiendo el ticket' ? 'bg-orange-500' : 'bg-yellow-500'
+                      }`}></span>
+                      <span className="font-semibold text-gray-300">{ticket.status}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {waLink && (
+                        <a
+                          href={waLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Contactar al cliente por WhatsApp"
+                          className="bg-green-600/20 hover:bg-green-600 text-green-300 hover:text-white text-xs font-semibold p-2 rounded-xl border border-green-700/40 transition"
+                        >
+                          <MessageSquare size={14} />
+                        </a>
+                      )}
+                      <button
+                        onClick={() => handleStatusChange(ticket.id, ticket.status)}
+                        className="bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-xl border border-purple-700/40 transition flex items-center gap-1"
+                      >
+                        Avanzar <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

@@ -14,7 +14,6 @@ export default function ClientView() {
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Consultar si hay un ticket activo y escuchar cambios en tiempo real
   useEffect(() => {
     const savedTicketId = localStorage.getItem('active_ticket_id')
     if (savedTicketId) {
@@ -30,11 +29,8 @@ export default function ClientView() {
       .single()
 
     if (!error && data) {
+      // Si el ticket ya fue atendido y ya tiene rating, limpiamos para permitir nuevo ticket
       setActiveTicket(data)
-      // Si el ticket ya está atendido y no tiene rating, permitimos evaluar
-      if (data.status === 'Ticket atendido' && !data.rating) {
-        // Opcional: abrir modal de calificación si el cliente entra y ya se completó
-      }
     } else {
       localStorage.removeItem('active_ticket_id')
     }
@@ -75,7 +71,6 @@ export default function ClientView() {
     setActiveTicket(data)
     localStorage.setItem('active_ticket_id', data.id)
 
-    // Confeti al crear el ticket con éxito (Sin modal forzado de estrellas todavía)
     confetti({
       particleCount: 120,
       spread: 70,
@@ -126,7 +121,7 @@ export default function ClientView() {
           })}
         </div>
 
-        {/* Si el ticket ya está atendido, se habilita el botón para evaluar */}
+        {/* Evaluación de estrellas solo habilitada cuando el ticket está atendido */}
         {currentStatus === 'Ticket atendido' && !ticket.rating && (
           <div className="bg-purple-950/40 border border-purple-700/40 p-4 rounded-2xl text-center animate-pulse">
             <p className="text-xs text-purple-200 font-medium mb-2">¡Tu servicio ha sido completado con éxito!</p>
@@ -140,18 +135,30 @@ export default function ClientView() {
         )}
 
         {ticket.rating && (
-          <div className="bg-green-950/30 border border-green-800/40 p-4 rounded-2xl text-center">
-            <p className="text-xs text-green-300 font-medium mb-1">¡Gracias por tu valoración!</p>
+          <div className="bg-green-950/30 border border-green-800/40 p-4 rounded-2xl text-center space-y-2">
+            <p className="text-xs text-green-300 font-medium">¡Gracias por tu valoración!</p>
             <div className="flex justify-center gap-1">
               {[...Array(ticket.rating)].map((_, i) => (
                 <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
               ))}
             </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem('active_ticket_id')
+                setActiveTicket(null)
+              }}
+              className="mt-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold py-2 px-4 rounded-xl transition"
+            >
+              Crear Nuevo Ticket
+            </button>
           </div>
         )}
       </div>
     )
   }
+
+  // Comprobar si el ticket activo ya fue completado y calificado
+  const isTicketFinished = activeTicket && activeTicket.status === 'Ticket atendido' && activeTicket.rating
 
   return (
     <div className="max-w-md mx-auto p-4 md:p-6 pb-20 animate-fadeIn">
@@ -176,14 +183,15 @@ export default function ClientView() {
         </div>
       </div>
 
-      {activeTicket ? (
+      {/* Si hay un ticket activo y NO ha terminado, se muestra la tarjeta y se BLOQUEA la creación de nuevos tickets */}
+      {activeTicket && !isTicketFinished ? (
         <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl relative overflow-hidden mb-6">
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="flex justify-between items-start mb-4">
             <div>
               <span className="text-[10px] uppercase font-bold tracking-widest text-purple-400 bg-purple-950/50 px-2.5 py-1 rounded-md border border-purple-800/30">
-                Ticket Activo
+                Ticket en Curso (Bloqueado nuevo ingreso)
               </span>
               <h3 className="text-xl font-bold text-white mt-2">{activeTicket.ticket_type}</h3>
             </div>
@@ -202,18 +210,9 @@ export default function ClientView() {
           </div>
 
           {renderTimeline(activeTicket.status, activeTicket)}
-
-          <button
-            onClick={() => {
-              localStorage.removeItem('active_ticket_id')
-              setActiveTicket(null)
-            }}
-            className="w-full mt-6 bg-[#221c38] hover:bg-[#2e264c] text-gray-300 font-medium py-2.5 rounded-xl text-xs transition border border-[#3b305c]"
-          >
-            Crear un nuevo ticket
-          </button>
         </div>
       ) : (
+        /* Formulario habilitado solo si no hay ticket activo o el anterior ya fue atendido y evaluado */
         <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl">
           <h2 className="text-lg font-bold text-white mb-4">Nuevo Requerimiento</h2>
           
