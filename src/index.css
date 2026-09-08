@@ -3,14 +3,24 @@
 @tailwind utilities;
 
 body {
-  background-color: #062821;
+  background-color: #f4f7f6;
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 40%);
+    radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(5, 150, 105, 0.05) 0%, transparent 40%);
   color: #1f2937;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
+}
+
+/* Animación fluida personalizada */
+@keyframes pulseSubtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 0.4s ease-in-out;
 }
 
 /* Scrollbar personalizado */
@@ -18,10 +28,10 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #062821;
+  background: #f4f7f6;
 }
 ::-webkit-scrollbar-thumb {
-  background: #044e3b;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
