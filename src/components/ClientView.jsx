@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { PlusCircle, Clock, CheckCircle2, AlertCircle, Building2, User, Tag, ArrowRight, Star } from 'lucide-react'
+import { PlusCircle, Clock, CheckCircle2, Building2, User, Tag, ArrowRight, Star, FileText } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import confetti from 'canvas-confetti'
 import RatingModal from './RatingModal'
@@ -29,7 +29,6 @@ export default function ClientView() {
       .single()
 
     if (!error && data) {
-      // Si el ticket ya fue atendido y ya tiene rating, limpiamos para permitir nuevo ticket
       setActiveTicket(data)
     } else {
       localStorage.removeItem('active_ticket_id')
@@ -81,11 +80,11 @@ export default function ClientView() {
   const getPriorityBadge = (p) => {
     switch (p) {
       case 'Necesario':
-        return <span className="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 px-3 py-1 rounded-full text-xs font-semibold">🟡 Necesario</span>
+        return <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold">🟡 Necesario</span>
       case 'Prioritario':
-        return <span className="bg-orange-500/20 text-orange-300 border border-orange-500/30 px-3 py-1 rounded-full text-xs font-semibold">🟠 Prioritario</span>
+        return <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-bold">🟠 Prioritario</span>
       case 'Urgente':
-        return <span className="bg-red-500/20 text-red-300 border border-red-500/30 px-3 py-1 rounded-full text-xs font-semibold">🔴 Urgente</span>
+        return <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-bold">🔴 Urgente</span>
       default:
         return null
     }
@@ -97,10 +96,10 @@ export default function ClientView() {
     if (currentIndex === -1) currentIndex = 0
 
     return (
-      <div className="mt-6 pt-6 border-t border-[#2a2240]">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Estado del Proceso en Tiempo Real</p>
+      <div className="mt-6 pt-6 border-t border-gray-100">
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Progreso en Tiempo Real</p>
         <div className="relative flex items-center justify-between max-w-sm mx-auto mb-6">
-          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-[#2a2240] z-0"></div>
+          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-gray-200 z-0"></div>
           
           {steps.map((step, idx) => {
             const isCompleted = idx <= currentIndex
@@ -108,12 +107,12 @@ export default function ClientView() {
               <div key={step} className="relative z-10 flex flex-col items-center">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
                   isCompleted 
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50 scale-105' 
-                    : 'bg-[#221c38] text-gray-500 border border-[#362b52]'
+                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30 scale-105' 
+                    : 'bg-gray-100 text-gray-400 border border-gray-300'
                 }`}>
                   {idx < currentIndex ? <CheckCircle2 size={18} /> : idx + 1}
                 </div>
-                <span className={`text-[11px] mt-2 font-medium text-center max-w-[80px] ${isCompleted ? 'text-purple-300' : 'text-gray-500'}`}>
+                <span className={`text-[11px] mt-2 font-semibold text-center max-w-[80px] ${isCompleted ? 'text-emerald-700' : 'text-gray-400'}`}>
                   {step}
                 </span>
               </div>
@@ -121,13 +120,12 @@ export default function ClientView() {
           })}
         </div>
 
-        {/* Evaluación de estrellas solo habilitada cuando el ticket está atendido */}
         {currentStatus === 'Ticket atendido' && !ticket.rating && (
-          <div className="bg-purple-950/40 border border-purple-700/40 p-4 rounded-2xl text-center animate-pulse">
-            <p className="text-xs text-purple-200 font-medium mb-2">¡Tu servicio ha sido completado con éxito!</p>
+          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center animate-pulse">
+            <p className="text-xs text-emerald-800 font-bold mb-2">¡Servicio completado con éxito!</p>
             <button
               onClick={() => setShowModal(true)}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition"
             >
               Evaluar Experiencia ⭐
             </button>
@@ -135,8 +133,8 @@ export default function ClientView() {
         )}
 
         {ticket.rating && (
-          <div className="bg-green-950/30 border border-green-800/40 p-4 rounded-2xl text-center space-y-2">
-            <p className="text-xs text-green-300 font-medium">¡Gracias por tu valoración!</p>
+          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-2">
+            <p className="text-xs text-emerald-800 font-bold">¡Gracias por valorar nuestro servicio!</p>
             <div className="flex justify-center gap-1">
               {[...Array(ticket.rating)].map((_, i) => (
                 <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
@@ -147,7 +145,7 @@ export default function ClientView() {
                 localStorage.removeItem('active_ticket_id')
                 setActiveTicket(null)
               }}
-              className="mt-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold py-2 px-4 rounded-xl transition"
+              className="mt-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2 px-4 rounded-xl transition shadow-md shadow-emerald-600/20"
             >
               Crear Nuevo Ticket
             </button>
@@ -157,7 +155,6 @@ export default function ClientView() {
     )
   }
 
-  // Comprobar si el ticket activo ya fue completado y calificado
   const isTicketFinished = activeTicket && activeTicket.status === 'Ticket atendido' && activeTicket.rating
 
   return (
@@ -173,86 +170,83 @@ export default function ClientView() {
         />
       )}
 
-      <div className="flex justify-between items-center mb-6">
+      {/* Header estilo perfil de referencia */}
+      <div className="flex justify-between items-center mb-6 bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20 text-white">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Portal de Clientes</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Seguimiento de tu solicitud técnica</p>
+          <span className="text-xs text-emerald-300 font-medium">Portal de Atención</span>
+          <h1 className="text-xl font-bold">Solicitud de Soporte</h1>
         </div>
-        <div className="bg-[#161325] border border-[#2a2240] p-2.5 rounded-2xl text-purple-400 shadow-inner">
-          <Tag size={20} />
+        <div className="w-10 h-10 rounded-full bg-emerald-500/30 flex items-center justify-center border border-emerald-400/30 text-emerald-200">
+          <FileText size={20} />
         </div>
       </div>
 
-      {/* Si hay un ticket activo y NO ha terminado, se muestra la tarjeta y se BLOQUEA la creación de nuevos tickets */}
       {activeTicket && !isTicketFinished ? (
-        <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl relative overflow-hidden mb-6">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
-          
+        <div className="bg-white rounded-3xl p-6 shadow-2xl relative overflow-hidden mb-6 border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <span className="text-[10px] uppercase font-bold tracking-widest text-purple-400 bg-purple-950/50 px-2.5 py-1 rounded-md border border-purple-800/30">
-                Ticket en Curso (Bloqueado nuevo ingreso)
+              <span className="text-[10px] uppercase font-extrabold tracking-widest text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
+                Ticket en Curso (Bloqueado)
               </span>
-              <h3 className="text-xl font-bold text-white mt-2">{activeTicket.ticket_type}</h3>
+              <h3 className="text-lg font-bold text-gray-800 mt-2">{activeTicket.ticket_type}</h3>
             </div>
             {getPriorityBadge(activeTicket.priority)}
           </div>
 
-          <div className="space-y-2 text-sm text-gray-300 my-4 bg-[#0c0a14]/60 p-4 rounded-2xl border border-[#2a2240]/50">
+          <div className="space-y-2 text-sm text-gray-600 my-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
             <div className="flex items-center gap-2">
-              <User size={15} className="text-purple-400" />
-              <span className="text-gray-400">Cliente:</span> <strong className="text-white">{activeTicket.client_name}</strong>
+              <User size={15} className="text-emerald-600" />
+              <span>Cliente:</span> <strong className="text-gray-900">{activeTicket.client_name}</strong>
             </div>
             <div className="flex items-center gap-2">
-              <Building2 size={15} className="text-purple-400" />
-              <span className="text-gray-400">Empresa:</span> <strong className="text-white">{activeTicket.company}</strong>
+              <Building2 size={15} className="text-emerald-600" />
+              <span>Empresa:</span> <strong className="text-gray-900">{activeTicket.company}</strong>
             </div>
           </div>
 
           {renderTimeline(activeTicket.status, activeTicket)}
         </div>
       ) : (
-        /* Formulario habilitado solo si no hay ticket activo o el anterior ya fue atendido y evaluado */
-        <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl">
-          <h2 className="text-lg font-bold text-white mb-4">Nuevo Requerimiento</h2>
+        <div className="bg-white rounded-3xl p-6 shadow-2xl border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-800 mb-4">Generar Nuevo Ticket</h2>
           
           <form onSubmit={handleCreateTicket} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase">Nombre Completo</label>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Nombre Completo</label>
               <div className="relative">
-                <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   required
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   placeholder="Ej. Carlos Mendoza"
-                  className="w-full bg-[#0c0a14] border border-[#2a2240] rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-purple-500 transition"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-gray-900 text-sm focus:outline-none focus:border-emerald-500 transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase">Empresa</label>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Empresa</label>
               <div className="relative">
-                <Building2 size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                <Building2 size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   required
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   placeholder="Ej. Soluciones Globales S.A."
-                  className="w-full bg-[#0c0a14] border border-[#2a2240] rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-purple-500 transition"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-gray-900 text-sm focus:outline-none focus:border-emerald-500 transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase">Tipo de Ticket / Servicio</label>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Tipo de Ticket / Servicio</label>
               <select
                 value={ticketType}
                 onChange={(e) => setTicketType(e.target.value)}
-                className="w-full bg-[#0c0a14] border border-[#2a2240] rounded-2xl py-3 px-4 text-white text-sm focus:outline-none focus:border-purple-500 transition"
+                className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 text-gray-900 text-sm focus:outline-none focus:border-emerald-500 transition"
               >
                 <option value="Servicio técnico remoto">Servicio técnico remoto</option>
                 <option value="Mantenimiento de Redes">Mantenimiento de Redes</option>
@@ -262,12 +256,12 @@ export default function ClientView() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase">Nivel de Prioridad</label>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Nivel de Prioridad</label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { name: 'Necesario', color: 'border-yellow-500/40 text-yellow-300 bg-yellow-500/10' },
-                  { name: 'Prioritario', color: 'border-orange-500/40 text-orange-300 bg-orange-500/10' },
-                  { name: 'Urgente', color: 'border-red-500/40 text-red-300 bg-red-500/10' }
+                  { name: 'Necesario', color: 'border-yellow-300 text-yellow-800 bg-yellow-50' },
+                  { name: 'Prioritario', color: 'border-orange-300 text-orange-800 bg-orange-50' },
+                  { name: 'Urgente', color: 'border-red-300 text-red-800 bg-red-500/10' }
                 ].map((item) => (
                   <button
                     type="button"
@@ -275,8 +269,8 @@ export default function ClientView() {
                     onClick={() => setPriority(item.name)}
                     className={`py-2.5 px-2 rounded-xl text-xs font-bold border transition ${
                       priority === item.name 
-                        ? `${item.color} ring-2 ring-purple-500 shadow-md` 
-                        : 'border-[#2a2240] bg-[#0c0a14] text-gray-400 hover:border-gray-600'
+                        ? `${item.color} ring-2 ring-emerald-500 shadow-md` 
+                        : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'
                     }`}
                   >
                     {item.name}
@@ -288,9 +282,9 @@ export default function ClientView() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-purple-900/40 transition transform active:scale-95 flex items-center justify-center gap-2"
+              className="w-full mt-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-500/30 transition transform active:scale-95 flex items-center justify-center gap-2"
             >
-              {loading ? 'Generando...' : <>Generar Ticket <ArrowRight size={18} /></>}
+              {loading ? 'Generando...' : <>Crear Ticket <ArrowRight size={18} /></>}
             </button>
           </form>
         </div>
