@@ -9,7 +9,7 @@ export default function TechDashboard() {
   const [selectedTab, setSelectedTab] = useState('All')
   const [showPerformanceModal, setShowPerformanceModal] = useState(false)
   const [newTicketAlert, setNewTicketAlert] = useState(null)
-  const [animatingId, setAnimatingId] = useState(null) // Para efecto visual al avanzar
+  const [animatingId, setAnimatingId] = useState(null)
 
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [techWhatsapp, setTechWhatsapp] = useState(localStorage.getItem('tech_whatsapp') || '')
@@ -77,9 +77,8 @@ export default function TechDashboard() {
     alert('Ajustes guardados correctamente.')
   }
 
-  // TRANSICIÓN FLUIDA AL AVANZAR EL TICKET
   const handleStatusChange = async (ticketId, currentStatus) => {
-    setAnimatingId(ticketId) // Activa el efecto visual de pulso en la tarjeta
+    setAnimatingId(ticketId)
 
     let nextStatus = ''
     let resolvedAtValue = null
@@ -108,7 +107,6 @@ export default function TechDashboard() {
       alert('No se pudo actualizar el estado.')
       setAnimatingId(null)
     } else {
-      // Pequeño delay estético para que se luzca la animación fluida
       setTimeout(() => {
         setAnimatingId(null)
         fetchTickets()
@@ -330,7 +328,7 @@ export default function TechDashboard() {
                           <MessageSquare size={16} />
                         </a>
                       )}
-                      <button onClick={() => setTicketToDelete(ticket)} className="bg-red-50 text-red-600 p-2 rounded-xl" title="Eliminar"><Trash2 size=16 /></button>
+                      <button onClick={() => setTicketToDelete(ticket)} className="bg-red-50 text-red-600 p-2 rounded-xl" title="Eliminar"><Trash2 size={16} /></button>
                       <button 
                         onClick={() => handleStatusChange(ticket.id, ticket.status)}
                         disabled={isAnimating}
