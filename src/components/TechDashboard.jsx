@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, CheckCircle, Clock, AlertCircle, Building2, User, ChevronRight, Star, RefreshCw, BarChart3, Bell, Settings, MessageSquare, Mail, X } from 'lucide-react'
+import { Calendar, CheckCircle, Clock, AlertCircle, Building2, User, ChevronRight, Star, RefreshCw, BarChart3, Bell, Settings, MessageSquare, Mail, X, Trash2 } from 'lucide-react'
 import { supabase } from '../supabaseClient'
 import PerformanceModal from './PerformanceModal'
 
@@ -10,11 +10,14 @@ export default function TechDashboard() {
   const [showPerformanceModal, setShowPerformanceModal] = useState(false)
   const [newTicketAlert, setNewTicketAlert] = useState(null)
 
-  // Estados de configuración de notificaciones del técnico
+  // Estados de configuración de notificaciones
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [techWhatsapp, setTechWhatsapp] = useState(localStorage.getItem('tech_whatsapp') || '')
   const [techEmail, setTechEmail] = useState(localStorage.getItem('tech_email') || '')
   const [notifPermission, setNotifPermission] = useState(Notification.permission || 'default')
+
+  // Estado para el modal de confirmación de eliminación
+  const [ticketToDelete, setTicketToDelete] = useState(null)
 
   const fetchTickets = async () => {
     setLoading(true)
@@ -31,7 +34,6 @@ export default function TechDashboard() {
     setLoading(false)
   }
 
-  // Configurar Supabase Realtime y Notificaciones del navegador
   useEffect(() => {
     fetchTickets()
 
@@ -42,7 +44,6 @@ export default function TechDashboard() {
         setNewTicketAlert(ticket)
         fetchTickets()
 
-        // Si el navegador tiene permiso, lanzar notificación nativa
         if (Notification.permission === 'granted') {
           new Notification('¡Nuevo Ticket de Soporte!', {
             body: `${ticket.client_name} (${ticket.company}) - Prioridad: ${ticket.priority}`,
@@ -111,6 +112,28 @@ export default function TechDashboard() {
     }
   }
 
+  // Función para eliminar el ticket de Supabase
+  const confirmDeleteTicket = async () => {
+    if (!ticketToDelete) return
+
+    const { error } = await supabase
+      .from('tickets')
+      .delete()
+      .eq('id', ticketToDelete.id)
+
+    if (error) {
+      console.error('Error al eliminar ticket:', error)
+      alert('Hubo un error al eliminar el ticket de la base de datos.')
+    } else {
+      // Si el cliente tenía este ticket activo en su localStorage, limpiarlo
+      if (localStorage.getItem('active_ticket_id') === ticketToDelete.id) {
+        localStorage.removeItem('active_ticket_id')
+      }
+      setTicketToDelete(null)
+      fetchTickets()
+    }
+  }
+
   const getDaysBar = () => {
     const days = []
     for (let i = 4; i >= 0; i--) {
@@ -153,7 +176,37 @@ export default function TechDashboard() {
         <PerformanceModal tickets={tickets} onClose={() => setShowPerformanceModal(false)} />
       )}
 
-      {/* Modal de Configuración de Alertas */}
+      {/* Modal de Confirmación de Eliminación */}
+      {ticketToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 md:p-8 w-full max-w-sm shadow-2xl relative text-center">
+            <div className="w-12 h-12 bg-red-600/20 border border-red-500/30 text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={24} />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">¿Eliminar Ticket?</h2>
+            <p className="text-gray-300 text-xs mb-6">
+              ¿Estás seguro de eliminar el ticket de <strong className="text-white">{ticketToDelete.client_name}</strong> ({ticketToDelete.company})? Esto lo eliminará también de la base de datos permanentemente.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setTicketToDelete(null)}
+                className="flex-1 bg-[#221c38] hover:bg-[#2e264c] text-gray-300 font-semibold py-3 rounded-2xl text-xs transition border border-[#3b305c]"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteTicket}
+                className="flex-1 bg-red-600 hover:bg-red-500 text-white font-semibold py-3 rounded-2xl text-xs transition shadow-lg shadow-red-900/40"
+              >
+                Sí, Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Configuración */}
       {showSettingsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
           <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative">
@@ -243,7 +296,7 @@ export default function TechDashboard() {
         </div>
       )}
 
-      {/* Calendario Minimalista Superior con botón de Ajustes */}
+      {/* Calendario Minimalista Superior */}
       <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-4 mb-6 shadow-xl flex items-center justify-between overflow-x-auto">
         <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold uppercase tracking-wider px-2">
           <Calendar size={16} className="text-purple-400" /> Días:
@@ -326,7 +379,7 @@ export default function TechDashboard() {
         </div>
       </div>
 
-      {/* Listado de Tickets Recibidos con acceso rápido a WhatsApp si el técnico lo configuró */}
+      {/* Listado de Tickets Recibidos con Papelera y WhatsApp */}
       <div className="bg-[#161325] border border-[#2a2240] rounded-3xl p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -359,7 +412,17 @@ export default function TechDashboard() {
                       <span className="text-xs font-bold text-purple-400 bg-purple-950/60 px-2.5 py-1 rounded-md border border-purple-800/30">
                         {ticket.ticket_type}
                       </span>
-                      {getPriorityBadge(ticket.priority)}
+                      <div className="flex items-center gap-2">
+                        {getPriorityBadge(ticket.priority)}
+                        {/* Botón de papelera para eliminar ticket */}
+                        <button
+                          onClick={() => setTicketToDelete(ticket)}
+                          title="Eliminar ticket"
+                          className="text-gray-500 hover:text-red-400 bg-[#161325] hover:bg-red-950/40 p-1.5 rounded-lg border border-[#2a2240] transition"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
 
                     <h3 className="text-base font-bold text-white mb-2">{ticket.client_name}</h3>
