@@ -170,25 +170,25 @@ export default function ClientView() {
         />
       )}
 
-      {/* Header estilo perfil de referencia */}
-      <div className="flex justify-between items-center mb-6 bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20 text-white">
+      {/* Header estilo perfil de referencia en Verde Esmeralda */}
+      <div className="bg-emerald-800 rounded-3xl p-5 text-white mb-6 shadow-xl border border-emerald-700 flex justify-between items-center">
         <div>
-          <span className="text-xs text-emerald-300 font-medium">Portal de Atención</span>
+          <span className="text-xs text-emerald-200 font-medium">Portal de Atención</span>
           <h1 className="text-xl font-bold">Solicitud de Soporte</h1>
         </div>
-        <div className="w-10 h-10 rounded-full bg-emerald-500/30 flex items-center justify-center border border-emerald-400/30 text-emerald-200">
+        <div className="w-10 h-10 rounded-full bg-emerald-700 flex items-center justify-center border border-emerald-600 text-emerald-200 shadow-inner">
           <FileText size={20} />
         </div>
       </div>
 
       {activeTicket && !isTicketFinished ? (
-        <div className="bg-white rounded-3xl p-6 shadow-2xl relative overflow-hidden mb-6 border border-gray-100">
+        <div className="bg-white rounded-3xl p-6 shadow-xl relative overflow-hidden mb-6 border border-gray-100">
           <div className="flex justify-between items-start mb-4">
             <div>
               <span className="text-[10px] uppercase font-extrabold tracking-widest text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
                 Ticket en Curso (Bloqueado)
               </span>
-              <h3 className="text-lg font-bold text-gray-800 mt-2">{activeTicket.ticket_type}</h3>
+              <h3 className="text-lg font-bold text-gray-900 mt-2">{activeTicket.ticket_type}</h3>
             </div>
             {getPriorityBadge(activeTicket.priority)}
           </div>
@@ -207,12 +207,12 @@ export default function ClientView() {
           {renderTimeline(activeTicket.status, activeTicket)}
         </div>
       ) : (
-        <div className="bg-white rounded-3xl p-6 shadow-2xl border border-gray-100">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Generar Nuevo Ticket</h2>
+        <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Generar Nuevo Ticket</h2>
           
           <form onSubmit={handleCreateTicket} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Nombre Completo</label>
+              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase">Nombre Completo</label>
               <div className="relative">
                 <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -227,7 +227,7 @@ export default function ClientView() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Empresa</label>
+              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase">Empresa</label>
               <div className="relative">
                 <Building2 size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -242,7 +242,7 @@ export default function ClientView() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Tipo de Ticket / Servicio</label>
+              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase">Tipo de Ticket / Servicio</label>
               <select
                 value={ticketType}
                 onChange={(e) => setTicketType(e.target.value)}
@@ -256,12 +256,12 @@ export default function ClientView() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Nivel de Prioridad</label>
+              <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase">Nivel de Prioridad</label>
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { name: 'Necesario', color: 'border-yellow-300 text-yellow-800 bg-yellow-50' },
                   { name: 'Prioritario', color: 'border-orange-300 text-orange-800 bg-orange-50' },
-                  { name: 'Urgente', color: 'border-red-300 text-red-800 bg-red-500/10' }
+                  { name: 'Urgente', color: 'border-red-300 text-red-800 bg-red-50' }
                 ].map((item) => (
                   <button
                     type="button"
